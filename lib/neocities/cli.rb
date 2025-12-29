@@ -580,7 +580,7 @@ HERE
       puts <<HERE
 
   |\\---/|
-  | #{PENELOPE_EYES.sample}_#{PENELOPE_EYES.sample} |  #{@pastel.on_cyan.bold ' Neocities '}
+  | #{PENELOPE_EYES.sample}_#{PENELOPE_EYES.sample} |  #{@pastel.on_red.bold ' Neocities red '}
    \\_#{PENELOPE_MOUTHS.sample}_/
 
 HERE
