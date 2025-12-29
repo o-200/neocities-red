@@ -3,10 +3,13 @@ require 'pastel'
 require 'tty/table'
 require 'tty/prompt'
 require 'fileutils'
-require 'json' # for reading configs
-require 'whirly' # for loader spinner
+require 'json'
+require 'whirly'
 
 require File.join(File.dirname(__FILE__), 'client')
+
+# warning - the big quantity of working threads could be considered like-a DDOS. Your ip-address could get banned for a few days. 
+MAX_THREADS = 5
 
 module Neocities
   class CLI
@@ -22,7 +25,7 @@ module Neocities
       @subargs = @argv[1..@argv.length]
       @prompt = TTY::Prompt.new
       @api_key = ENV['NEOCITIES_API_KEY'] || nil
-      @app_config_path = File.join self.class.app_config_path('neocities'), 'config.json' # added json extension
+      @app_config_path = File.join self.class.app_config_path('neocities'), 'config.json'
     end
 
     def display_response(resp)
@@ -59,8 +62,8 @@ module Neocities
           data = JSON.load file
 
           if data
-            @api_key = data["API_KEY"].strip # Remove any trailing whitespace causing HTTP requests to fail
-            @sitename = data["SITENAME"] # Store the sitename to be able to reference it later
+            @api_key = data["API_KEY"].strip
+            @sitename = data["SITENAME"]
             @last_pull = data["LAST_PULL"] # Store the last time a pull was performed so that we only fetch from updated files
           end
         rescue Errno::ENOENT
@@ -189,14 +192,26 @@ module Neocities
       @excluded_files = []
       @dry_run = false
       @prune = false
+
       loop do
         case @subargs[0]
-        when '--no-gitignore' then @subargs.shift; @no_gitignore = true
-        when '-e' then @subargs.shift; @excluded_files.push(@subargs.shift)
-        when '--dry-run' then @subargs.shift; @dry_run = true
-        when '--prune' then @subargs.shift; @prune = true
-        when /^-/ then puts(@pastel.red.bold("Unknown option: #{@subargs[0].inspect}")); display_push_help_and_exit
-        else break
+        when '--no-gitignore' 
+          @subargs.shift
+          @no_gitignore = true
+        when '-e' then 
+          @subargs.shift
+          @excluded_files.push(@subargs.shift)
+        when '--dry-run' 
+          @subargs.shift
+          @dry_run = true
+        when '--prune'
+          @subargs.shift
+          @prune = true
+        when /^-/
+          puts @pastel.red.bold("Unknown option: #{@subargs[0].inspect}")
+          display_push_help_and_exit
+        else 
+          break
         end
       end
 
@@ -266,26 +281,38 @@ module Neocities
           end
         end
 
-        paths.select! { |p| !@excluded_files.include?(p) }
-
-        paths.select! { |p| !@excluded_files.include?(Pathname.new(p).dirname.to_s) }
-
+        paths -= @excluded_files
         paths.collect! { |path| Pathname path }
 
-        paths.each do |path|
-          next if path.directory?
-          print @pastel.bold("Uploading #{path} ... ")
-          resp = @client.upload path, path, @dry_run
+        task_queue = Queue.new
+        paths.each { |path| task_queue.push(path) }
 
-          if resp[:result] == 'error' && resp[:error_type] == 'file_exists'
-            print @pastel.yellow.bold("EXISTS") + "\n"
-          elsif resp[:result] == 'success'
-            print @pastel.green.bold("SUCCESS") + "\n"
-          else
-            print "\n"
-            display_response resp
+        threads = []
+
+        MAX_THREADS.times do
+          threads << Thread.new do
+            until task_queue.empty?
+              path = task_queue.pop(true) rescue nil
+              next if path.nil? || path.directory?
+
+              print @pastel.bold("Uploading #{path} ... ")
+              resp = @client.upload path, path, @dry_run
+
+              if resp[:result] == 'error' && resp[:error_type] == 'file_exists'
+                print @pastel.yellow.bold("EXISTS") + "\n"
+              elsif resp[:result] == 'success'
+                print @pastel.green.bold("SUCCESS") + "\n"
+              else
+                print "\n"
+                display_response resp
+              end
+            end
           end
         end
+
+
+        threads.each(&:join)
+        puts 'All files uploaded.'
       end
     end
 
