@@ -5,7 +5,7 @@ require 'tty/prompt'
 require 'fileutils'
 require 'json'
 require 'whirly'
-
+require 'digest'
 require 'time'
 
 require File.join(File.dirname(__FILE__), 'client')
@@ -160,8 +160,7 @@ module Neocities
       if @subargs.delete('-a')
         @subargs[0] = nil
       end
-
-      resp = @client.list @subargs[0]
+      resp = @client.list(@subargs[0])
 
       if resp[:result] == 'error'
         display_response resp
@@ -170,12 +169,13 @@ module Neocities
 
       if @detail
         out = [
-          [@pastel.bold('Path'), @pastel.bold('Size'), @pastel.bold('Updated')]
+          [@pastel.bold('Path'), @pastel.bold('Size'), @pastel.bold('sha1_Hash'), @pastel.bold('Updated')]
         ]
         resp[:files].each do |file|
           out.push([
             @pastel.send(file[:is_directory] ? :blue : :green).bold(file[:path]),
             file[:size] || '',
+            file[:sha1_hash],
             Time.parse(file[:updated_at]).localtime
           ])
         end
@@ -195,6 +195,7 @@ module Neocities
       @excluded_files = []
       @dry_run = false
       @prune = false
+      @optimized = false
 
       loop do
         case @subargs[0]
@@ -220,6 +221,9 @@ module Neocities
         when '--prune'
           @subargs.shift
           @prune = true
+        when '--optimized'
+          @subargs.shift
+          @optimized = true
         when /^-/
           puts @pastel.red.bold("Unknown option: #{@subargs[0].inspect}")
           display_push_help_and_exit
@@ -298,6 +302,19 @@ module Neocities
           @excluded_files += paths.select { |path| path.start_with?('.') }
         end
 
+        # do not upload files which already uploaded (checking by sha1_hash)
+        if @optimized
+          hex = paths.select { |path| File.file?(path) }
+                     .map { |file| { filepath: file, sha1_hash: Digest::SHA1.file(file).hexdigest } } 
+          
+          res = @client.list
+          server_hex = res[:files].map { |n| n[:sha1_hash] }.compact
+          
+          uploaded_files = hex.select { |n| server_hex.include?(n[:sha1_hash]) }
+                              .map { |n| n[:filepath] }
+          @excluded_files += uploaded_files  
+        end
+        
         paths -= @excluded_files
         paths.collect! { |path| Pathname path }
 
@@ -560,6 +577,8 @@ HERE
   #{@pastel.green '$ neocities push --ignore-dotfiles .'}               Ignore files with '.' at the beginning (for example, '.git/')
 
   #{@pastel.green '$ neocities push --dry-run .'}                       Just show what would be uploaded
+
+  #{@pastel.green '$ neocities push --optimized .'}                      Do not upload unchanged files. 
 
   #{@pastel.green '$ neocities push --prune .'}                         Delete site files not in dir (be careful!)
 
