@@ -198,9 +198,16 @@ module Neocities
         when '--no-gitignore' 
           @subargs.shift
           @no_gitignore = true
-        when '-e' then 
+        when '-e'
           @subargs.shift
-          @excluded_files.push(@subargs.shift)
+          filepath = Pathname.new(@subargs.shift).cleanpath.to_s
+
+          if File.file?(filepath)
+            @excluded_files.push(filepath)
+          elsif File.directory?(filepath)
+            folder_files = (Dir.glob(File.join(filepath, '**', '*'), File::FNM_DOTMATCH)).push(filepath)
+            @excluded_files += folder_files
+          end
         when '--dry-run' 
           @subargs.shift
           @dry_run = true
