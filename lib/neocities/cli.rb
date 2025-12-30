@@ -189,6 +189,7 @@ module Neocities
     def push
       display_push_help_and_exit if @subargs.empty?
       @no_gitignore = false
+      @ignore_dotfiles = false
       @excluded_files = []
       @dry_run = false
       @prune = false
@@ -198,6 +199,9 @@ module Neocities
         when '--no-gitignore' 
           @subargs.shift
           @no_gitignore = true
+        when '--ignore-dotfiles'
+          @subargs.shift
+          @ignore_dotfiles = true
         when '-e'
           @subargs.shift
           filepath = Pathname.new(@subargs.shift).cleanpath.to_s
@@ -286,6 +290,10 @@ module Neocities
             puts "Not pushing .gitignore entries (--no-gitignore to disable)"
           rescue Errno::ENOENT
           end
+        end
+
+        if @ignore_dotfiles 
+          @excluded_files += paths.select { |path| path.start_with?('.') }
         end
 
         paths -= @excluded_files
@@ -546,6 +554,8 @@ HERE
   #{@pastel.green '$ neocities push -e node_modules -e secret.txt .'}   Exclude certain files from push
 
   #{@pastel.green '$ neocities push --no-gitignore .'}                  Don't use .gitignore to exclude files
+  
+  #{@pastel.green '$ neocities push --ignore-dotfiles .'}               Ignore files with '.' at the beginning (for example, '.git/')
 
   #{@pastel.green '$ neocities push --dry-run .'}                       Just show what would be uploaded
 
