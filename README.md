@@ -6,9 +6,10 @@ Hello, there is a fork of [neocities-ruby gem](https://github.com/neocities/neoc
 
 1) Added MultiThread uploading of files to neocities. This feature boosts `neocities push`.
 2) Moves from `http.rb` to `faraday` gem.
+3) Added excluding folders (recursively with their files). Probably [bug](https://github.com/neocities/neocities-ruby/pull/67).
 
 ## TODO'S:
-2) Check all entire cli and client logic, fix bugs. [1](https://github.com/neocities/neocities-ruby/pull/67).
+2) Check all entire cli and client logic, fix bugs.
 3) Change dependencies for modern analogs.
 4) Refactor `cli.rb` or use `rails/thor` gem instead.
 5) Do not push files to neocities which already exists, check their hash-sums before uploading.
