@@ -13,12 +13,11 @@ Hello, there is a fork of [neocities-ruby gem](https://github.com/neocities/neoc
 
 
 ## TODO'S:
-2) Check all entire cli and client logic, fix bugs.
-3) Change dependencies for modern analogs.
-4) Refactor `cli.rb` or use `rails/thor` gem instead.
-5) Do not push files to neocities which already exists, check their hash-sums before uploading.
-6) Add tests
-7) Make sure that gem is compatible with Linux, Freebsd, Windows
+1) Check all entire cli and client logic, fix bugs.
+2) Change dependencies for modern analogs.
+3) Refactor `cli.rb` or use `rails/thor` gem instead.
+4) Add tests
+5) Make sure that gem is compatible with Linux, Freebsd, Windows
 
 # The Neocities Gem
 
