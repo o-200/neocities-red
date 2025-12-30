@@ -6,6 +6,8 @@ require 'fileutils'
 require 'json'
 require 'whirly'
 
+require 'time'
+
 require File.join(File.dirname(__FILE__), 'client')
 
 # warning - the big quantity of working threads could be considered like-a DDOS. Your ip-address could get banned for a few days. 

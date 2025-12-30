@@ -8,6 +8,7 @@ Hello, there is a fork of [neocities-ruby gem](https://github.com/neocities/neoc
 2) Moves from `http.rb` to `faraday` gem.
 3) Added excluding folders (recursively with their files). Probably [bug](https://github.com/neocities/neocities-ruby/pull/67).
 4) Added '--ignore-dotfiles' to ignore all files-folders starts with '.'
+5) Fixed bug with neocities info on modern rubies
 
 ## TODO'S:
 2) Check all entire cli and client logic, fix bugs.
