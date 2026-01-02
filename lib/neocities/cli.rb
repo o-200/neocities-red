@@ -511,7 +511,7 @@ HERE
 
   #{@pastel.dim 'Examples:'}
 
-  #{@pastel.green '$ neocities upload /img.jpg /images/img2.jpg'} Upload img.jpg to images folder
+  #{@pastel.green '$ neocities upload /img.jpg /images/img2.jpg'} Upload img.jpg to /images folder and with img2.jpg name
 HERE
       exit
     end
