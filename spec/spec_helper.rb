@@ -7,18 +7,15 @@ VCR.configure do |config|
   config.hook_into :webmock
   config.configure_rspec_metadata!
   
-  # Filter sensitive data (API keys)
   config.filter_sensitive_data('<API_KEY>') { ENV['NEOCITIES_API_KEY'] || 'test_api_key' }
   config.filter_sensitive_data('<SITENAME>') { ENV['NEOCITIES_SITENAME'] || 'test_site' }
   config.filter_sensitive_data('<PASSWORD>') { ENV['NEOCITIES_PASSWORD'] || 'test_password' }
   
-  # Default cassette options
   config.default_cassette_options = {
     record: :once,  # :new_episodes, :none, :all, :once
     match_requests_on: [:method, :uri, :body]
   }
   
-  # Filter headers
   config.before_record do |interaction|
     interaction.request.headers.delete('Authorization')
   end

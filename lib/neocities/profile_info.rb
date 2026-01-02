@@ -1,4 +1,3 @@
-# lib/neocities/profile_info.rb
 require 'time'
 require 'pastel'
 
