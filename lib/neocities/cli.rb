@@ -9,6 +9,7 @@ require 'digest'
 require 'time'
 
 require File.join(File.dirname(__FILE__), 'client')
+require File.join(File.dirname(__FILE__), 'profile_info')
 
 # warning - the big quantity of working threads could be considered like-a DDOS. Your ip-address could get banned for a few days. 
 MAX_THREADS = 5
@@ -31,6 +32,12 @@ module Neocities
     end
 
     def display_response(resp)
+      if resp.is_a?(Exception)
+        out = "#{@pastel.red.bold 'ERROR:'} #{resp.detailed_message}"
+        puts out
+        exit
+      end
+
       if resp[:result] == 'success'
         puts "#{@pastel.green.bold 'SUCCESS:'} #{resp[:message]}"
       elsif resp[:result] == 'error' && resp[:error_type] == 'file_exists'
@@ -133,22 +140,10 @@ module Neocities
     end
 
     def info
-      resp = @client.info(@subargs[0] || @sitename)
-
-      if resp[:result] == 'error'
-        display_response resp
-        exit
-      end
-
-      out = []
-
-      resp[:info].each do |k, v|
-        v = Time.parse(v).localtime if v && (k == :created_at || k == :last_updated)
-        out.push [@pastel.bold(k), v]
-      end
-
-      puts TTY::Table.new(out).to_s
-      exit
+      profile_info = ProfileInfo.new(@client, @subargs, @sitename).pretty_print
+      puts TTY::Table.new(profile_info).to_s
+    rescue Exception => e
+      display_response(e)
     end
 
     def list
