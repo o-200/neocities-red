@@ -4,6 +4,8 @@ Hello, there is a fork of [neocities-ruby gem](https://github.com/neocities/neoc
 
 ## Main changes/Features:
 
+### Currently, this gems tests with ruby 3.4.*, it doesn't supports ruby 4 due of dependencies
+
 1) Added MultiThread uploading of files to neocities. This feature boosts `neocities push`;
 2) Moves from `http.rb` to `faraday` gem;
 3) Fixed -e flag to exclude folders recursively;
@@ -12,13 +14,13 @@ Hello, there is a fork of [neocities-ruby gem](https://github.com/neocities/neoc
 6) Fixed bug with neocities info on modern rubies;
 7) Re-designed #upload method;
 
-
 ## TODO'S:
 1) Check all entire cli and client logic, fix bugs.
 2) Change dependencies for modern analogs.
 3) Refactor `cli.rb` or use `rails/thor` gem instead.
 4) Add tests
 5) Make sure that gem is compatible with Linux, Freebsd, Windows
+6) Make it compatible with ruby 4.0.0
 
 # The Neocities Gem
 
