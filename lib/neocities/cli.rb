@@ -10,6 +10,7 @@ require 'time'
 
 require File.join(File.dirname(__FILE__), 'client')
 require File.join(File.dirname(__FILE__), 'profile_info')
+require File.join(File.dirname(__FILE__), 'file_uploader')
 
 # warning - the big quantity of working threads could be considered like-a DDOS. Your ip-address could get banned for a few days. 
 MAX_THREADS = 5
@@ -293,7 +294,7 @@ module Neocities
           end
         end
 
-        if @ignore_dotfiles 
+        if @ignore_dotfiles
           @excluded_files += paths.select { |path| path.start_with?('.') }
         end
 
@@ -324,17 +325,7 @@ module Neocities
               path = task_queue.pop(true) rescue nil
               next if path.nil? || path.directory?
 
-              print @pastel.bold("Uploading #{path} ... ")
-              resp = @client.upload path, path, @dry_run
-
-              if resp[:result] == 'error' && resp[:error_type] == 'file_exists'
-                print @pastel.yellow.bold("EXISTS") + "\n"
-              elsif resp[:result] == 'success'
-                print @pastel.green.bold("SUCCESS") + "\n"
-              else
-                print "\n"
-                display_response resp
-              end
+              Neocities::FileUploader.new(@client, path).upload
             end
           end
         end
@@ -347,35 +338,18 @@ module Neocities
 
     def upload
       display_upload_help_and_exit if @subargs.empty?
-      @dir = ''
 
       loop do
         case @subargs[0]
-        when '-d' then @subargs.shift; @dir = @subargs.shift
-        when /^-/ then puts(@pastel.red.bold("Unknown option: #{@subargs[0].inspect}")); display_upload_help_and_exit
-        else break
+        when /^-/ 
+          puts @pastel.red.bold("Unknown option: #{@subargs[0].inspect}")
+          display_upload_help_and_exit
+        else
+          break
         end
       end
 
-      @subargs.each do |path|
-        path = Pathname path
-
-        if !path.exist?
-          display_response result: 'error', message: "#{path} does not exist locally."
-          next
-        end
-
-        if path.directory?
-          puts "#{path} is a directory, skipping (see the push command)"
-          next
-        end
-
-        remote_path = ['/', @dir, path.basename.to_s].join('/').gsub %r{/+}, '/'
-
-        puts @pastel.bold("Uploading #{path} to #{remote_path} ...")
-        resp = @client.upload path, remote_path
-        display_response resp
-      end
+      FileUploader.new(@client, @subargs[0], @subargs[1]).upload
     end
 
     def pull
@@ -533,14 +507,11 @@ HERE
       display_banner
 
       puts <<HERE
-  #{@pastel.green.bold 'upload'} - Upload individual files to your Neocities site
+  #{@pastel.green.bold 'upload'} - Upload file to your Neocities site to the specific path
 
   #{@pastel.dim 'Examples:'}
 
-  #{@pastel.green '$ neocities upload img.jpg img2.jpg'}    Upload images to the root of your site
-
-  #{@pastel.green '$ neocities upload -d images img.jpg'}   Upload img.jpg to the 'images' directory on your site
-
+  #{@pastel.green '$ neocities upload /img.jpg /images/img2.jpg'} Upload img.jpg to /images folder and with img2.jpg name
 HERE
       exit
     end
