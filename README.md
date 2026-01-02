@@ -8,11 +8,11 @@ Hello, there is a fork of [neocities-ruby gem](https://github.com/neocities/neoc
 
 1) Added MultiThread uploading of files to neocities. This feature boosts `neocities push`;
 2) Moves from `http.rb` to `faraday` gem;
-3) Fixed -e flag to exclude folders recursively;
-4) Added '--ignore-dotfiles' to ignore all files-folders starts with '.';
-5) Added '--optimized' flag to upload only modified files;
+3) Fixed `-e` flag to exclude folders recursively;
+4) Added `--ignore-dotfiles` to ignore all files-folders starts with '.';
+5) Added `--optimized` for `neocities push` flag to upload only modified files;
 6) Fixed bug with neocities info on modern rubies;
-7) Re-designed #upload method;
+7) Re-designed `upload` method;
 
 ## TODO'S:
 1) Check all entire cli and client logic, fix bugs.
