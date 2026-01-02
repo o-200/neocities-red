@@ -3,3 +3,5 @@ test.rb
 *.gem
 
 mise.toml
+
+.rspec_status
