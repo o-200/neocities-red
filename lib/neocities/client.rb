@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 begin
   require 'openssl/win/root' if Gem.win_platform?
-rescue
+rescue StandardError
 end
 
 require 'json'
@@ -19,7 +21,7 @@ module Neocities
   class Client
     API_URI = 'https://neocities.org/api/'
 
-    def initialize(opts={})
+    def initialize(opts = {})
       @uri = URI.parse API_URI
       @opts = opts
       @pastel = Pastel.new eachline: "\n"
@@ -41,23 +43,21 @@ module Neocities
       end
     end
 
-    def list(path=nil)
+    def list(path = nil)
       get 'list', path: path
     end
 
-    def pull(sitename, last_pull_time=nil, last_pull_loc=nil, quiet=true)
+    def pull(sitename, last_pull_time = nil, last_pull_loc = nil, quiet = true)
       site_info = get 'info', sitename: sitename
 
-      if site_info[:result] == 'error'
-        raise ArgumentError, site_info[:message]
-      end
+      raise ArgumentError, site_info[:message] if site_info[:result] == 'error'
 
       # handle custom domains for supporter accounts
-      if site_info[:info][:domain] && site_info[:info][:domain] != ""
-        domain = "https://#{site_info[:info][:domain]}/"
-      else
-        domain = "https://#{sitename}.neocities.org/"
-      end
+      domain = if site_info[:info][:domain] && site_info[:info][:domain] != ''
+                 "https://#{site_info[:info][:domain]}/"
+               else
+                 "https://#{sitename}.neocities.org/"
+               end
 
       # start stats
       success_loaded = 0
@@ -67,43 +67,41 @@ module Neocities
       # get list of files
       resp = get 'list'
 
-      if resp[:result] == 'error'
-        raise ArgumentError, resp[:message]
-      end
-      
+      raise ArgumentError, resp[:message] if resp[:result] == 'error'
+
       # fetch each file
       uri_parser = URI::Parser.new
       resp[:files].each do |file|
         if !file[:is_directory]
           print @pastel.bold("Pulling #{file[:path]} ... ") unless quiet
-          
-          if last_pull_time && \
-              last_pull_loc && \
-              Time.parse(file[:updated_at]) <= Time.parse(last_pull_time) && \
-              last_pull_loc == curr_dir && \
-              File.exist?(file[:path]) # case when user deletes file
 
-            # case when file hasn't been updated since last 
-            print "#{@pastel.yellow.bold "NO NEW UPDATES"}\n" unless quiet
+          if last_pull_time && \
+             last_pull_loc && \
+             Time.parse(file[:updated_at]) <= Time.parse(last_pull_time) && \
+             last_pull_loc == curr_dir && \
+             File.exist?(file[:path]) # case when user deletes file
+
+            # case when file hasn't been updated since last
+            print "#{@pastel.yellow.bold 'NO NEW UPDATES'}\n" unless quiet
 
             next
           end
-          
+
           pathtotry = uri_parser.escape(domain + file[:path])
           fileconts = @conn.get pathtotry
 
           if fileconts.status == 200
-            print "#{@pastel.green.bold 'SUCCESS'}\n" if !quiet
+            print "#{@pastel.green.bold 'SUCCESS'}\n" unless quiet
             success_loaded += 1
 
-            File.open("#{file[:path]}", "w") do |f|
+            File.open(file[:path].to_s, 'w') do |f|
               f.write(fileconts.body)
             end
-          else
-            print "#{@pastel.red.bold 'FAIL'}\n" if !quiet
+          elsif !quiet
+            print "#{@pastel.red.bold 'FAIL'}\n"
           end
         else
-          FileUtils.mkdir_p "#{file[:path]}"
+          FileUtils.mkdir_p file[:path].to_s
         end
       end
 
@@ -127,13 +125,13 @@ module Neocities
 
     def upload(path, remote_path = nil, dry_run = false)
       path = Pathname path
-      raise ArgumentError, "#{path.to_s} does not exist." unless path.exist?
+      raise ArgumentError, "#{path} does not exist." unless path.exist?
 
-      rpath = (remote_path || path.basename)
+      rpath = remote_path || path.basename
       res = upload_hash(rpath.to_s, Digest::SHA1.file(path.to_s).hexdigest)
 
       if res[:files] && res[:files][remote_path.to_s.to_sym] == true
-        return { 
+        {
           result: 'error',
           error_type: 'file_exists',
           message: 'file already exists and matches local file, not uploading'
@@ -147,8 +145,9 @@ module Neocities
       end
     end
 
-    def delete_wrapper_with_dry_run(paths, dry_run=false)
+    def delete_wrapper_with_dry_run(paths, dry_run = false)
       return { result: 'success' } if dry_run
+
       delete(paths)
     end
 
@@ -160,15 +159,15 @@ module Neocities
       get 'info', sitename: sitename
     end
 
-    def get(path, params={})
-      uri = @uri+path
+    def get(path, params = {})
+      uri = @uri + path
       uri.query = URI.encode_www_form params
       resp = @conn.get(uri)
 
       JSON.parse resp.body, symbolize_names: true
     end
 
-    def post(path, args={})
+    def post(path, args = {})
       uri = @uri + path
       resp = @conn.post(uri, args)
 

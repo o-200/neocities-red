@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'time'
 require 'pastel'
 
@@ -16,10 +18,8 @@ module Neocities
 
     def get_stats
       response = @client.info(@subargs[0] || @sitename)
-      
-      if response[:result] == 'error'
-        raise ClientError, response
-      end
+
+      raise ClientError, response if response[:result] == 'error'
 
       response
     end
@@ -28,9 +28,7 @@ module Neocities
       out = []
 
       get_stats[:info].each do |k, v|
-        if v && [:created_at, :last_updated].include?(k) 
-          v = Time.parse(v).localtime
-        end
+        v = Time.parse(v).localtime if v && %i[created_at last_updated].include?(k)
 
         out << [@pastel.bold(k.to_s), v]
       end

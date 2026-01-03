@@ -1,8 +1,10 @@
+# frozen_string_literal: true
+
 require 'pastel'
 require 'tty/table'
 
 module Neocities
-  class FileList    
+  class FileList
     def initialize(client, path, detail)
       @client = client
       @path = path
@@ -25,14 +27,14 @@ module Neocities
 
         resp[:files].each do |file|
           out.push([
-            @pastel.send(file[:is_directory] ? :blue : :green).bold(file[:path]),
-            file[:size] || '',
-            file[:sha1_hash],
-            Time.parse(file[:updated_at]).localtime
-          ])
+                     @pastel.send(file[:is_directory] ? :blue : :green).bold(file[:path]),
+                     file[:size] || '',
+                     file[:sha1_hash],
+                     Time.parse(file[:updated_at]).localtime
+                   ])
         end
 
-        puts TTY::Table.new(out).to_s
+        puts TTY::Table.new(out)
       end
 
       resp[:files].each do |file|

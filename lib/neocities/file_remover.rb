@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'pastel'
 
 module Neocities
@@ -12,17 +14,15 @@ module Neocities
 
     def remove
       puts @pastel.bold("Deleting #{filepath} ...")
-      
+
       response = @client.delete(filepath)
 
-      if response[:result] == 'error'
-        puts @pastel.bold(response[:message])
-      end
+      puts @pastel.bold(response[:message]) if response[:result] == 'error'
 
       if response[:result] == 'error' && response[:error_type] == 'file_exists'
-        print @pastel.yellow.bold("EXISTS")
+        print @pastel.yellow.bold('EXISTS')
       elsif response[:result] == 'success'
-        print @pastel.green.bold("SUCCESS")
+        print @pastel.green.bold('SUCCESS')
       end
 
       response
