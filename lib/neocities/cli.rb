@@ -116,11 +116,9 @@ module Neocities
 
     def delete
       display_delete_help_and_exit if @subargs.empty?
-      @subargs.each do |file|
-        puts @pastel.bold("Deleting #{file} ...")
-        resp = @client.delete file
 
-        display_response resp
+      @subargs.each do |path|
+        FileRemover.new(@client, path).remove
       end
     end
 
