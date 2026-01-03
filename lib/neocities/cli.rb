@@ -119,13 +119,20 @@ module Neocities
 
     def logout
       confirmed = false
+
       loop do
         case @subargs[0]
-        when '-y' then @subargs.shift; confirmed = true
-        when /^-/ then puts(@pastel.red.bold("Unknown option: #{@subargs[0].inspect}")); break
-        else break
+        when '-y'
+          @subargs.shift
+          confirmed = true
+        when /^-/ 
+          puts @pastel.red.bold("Unknown option: #{@subargs[0].inspect}")
+          break
+        else
+          break
         end
       end
+
       if confirmed
         FileUtils.rm @app_config_path
         puts @pastel.bold("Your api key has been removed.")
