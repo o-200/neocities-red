@@ -143,6 +143,7 @@ module Neocities
 
     def list
       display_list_help_and_exit if @subargs.empty?
+
       if @subargs.delete('-d') == '-d'
         @detail = true
       end
@@ -150,32 +151,10 @@ module Neocities
       if @subargs.delete('-a')
         @subargs[0] = nil
       end
-      resp = @client.list(@subargs[0])
 
-      if resp[:result] == 'error'
-        display_response resp
-        exit
-      end
+      path = @subargs[0]
 
-      if @detail
-        out = [
-          [@pastel.bold('Path'), @pastel.bold('Size'), @pastel.bold('sha1_Hash'), @pastel.bold('Updated')]
-        ]
-        resp[:files].each do |file|
-          out.push([
-            @pastel.send(file[:is_directory] ? :blue : :green).bold(file[:path]),
-            file[:size] || '',
-            file[:sha1_hash],
-            Time.parse(file[:updated_at]).localtime
-          ])
-        end
-        puts TTY::Table.new(out).to_s
-        exit
-      end
-
-      resp[:files].each do |file|
-        puts @pastel.send(file[:is_directory] ? :blue : :green).bold(file[:path])
-      end
+      FileList.new(@client, path, @detail).show
     end
 
     def push
