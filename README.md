@@ -48,4 +48,31 @@ After that, you are all set! Run `neocities` in a command line to see the option
 
 ## Neocities::Client
 
-This gem also ships with Neocities::Client, which you can use to write code that interfaces with the Neocities API.
+This gem ships with Neocities::Client, which you can use to write code that interfaces with the Neocities API.
+
+```ruby
+require 'neocities'
+
+# use api key
+params = {
+  api_key: 'MyKeyFromNeocities'
+}
+
+# or sitename and password
+# params = {
+#  sitename: 'petrapixel,
+#  password: 'mypass'
+# }
+
+client = Neocities::Client.new(params)
+client.key
+client.upload(path, remote_path)
+client.info(sitename)
+client.delete(path)
+client.push(path)
+client.list(path)
+```
+
+## Gem modules
+
+This gem also transpose all processes to several class in lib/neocities, which you also can use to write code.
