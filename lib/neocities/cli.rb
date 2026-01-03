@@ -8,11 +8,6 @@ require 'whirly'
 require 'digest'
 require 'time'
 
-require File.join(File.dirname(__FILE__), 'client')
-require File.join(File.dirname(__FILE__), 'profile_info')
-require File.join(File.dirname(__FILE__), 'file_uploader')
-require File.join(File.dirname(__FILE__), 'pizza')
-
 # warning - the big quantity of working threads could be considered like-a DDOS. Your ip-address could get banned for a few days. 
 MAX_THREADS = 5
 
@@ -116,11 +111,9 @@ module Neocities
 
     def delete
       display_delete_help_and_exit if @subargs.empty?
-      @subargs.each do |file|
-        puts @pastel.bold("Deleting #{file} ...")
-        resp = @client.delete file
 
-        display_response resp
+      @subargs.each do |path|
+        FileRemover.new(@client, path).remove
       end
     end
 

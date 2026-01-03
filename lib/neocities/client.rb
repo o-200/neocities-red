@@ -153,7 +153,7 @@ module Neocities
     end
 
     def delete(*paths)
-      post 'delete', 'filenames[]' => paths
+      post 'delete', 'filenames' => paths
     end
 
     def info(sitename)
