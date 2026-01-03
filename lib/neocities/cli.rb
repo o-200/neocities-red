@@ -347,32 +347,14 @@ module Neocities
     end
 
     def pull
-      begin
-        quiet = (['--quiet', '-q'].include? @subargs[0])
+      quiet = ['--quiet', '-q'].include?(@subargs[0])
+      file = File.read(@app_config_path)
+      data = JSON.load(file)
+      last_pull_time = data["LAST_PULL"]["time"]
+      last_pull_loc = data["LAST_PULL"]["loc"]
 
-        file = File.read @app_config_path
-        data = JSON.load file
-
-        last_pull_time = data["LAST_PULL"] ? data["LAST_PULL"]["time"] : nil
-        last_pull_loc = data["LAST_PULL"] ? data["LAST_PULL"]["loc"] : nil
-
-        Whirly.start spinner: ["😺", "😸", "😹", "😻", "😼", "😽", "🙀", "😿", "😾"], status: "Retrieving files for #{@pastel.bold @sitename}" if quiet
-        resp = @client.pull @sitename, last_pull_time, last_pull_loc, quiet
-
-        # write last pull data to file (not necessarily the best way to do this, but better than cloning every time)
-        data["LAST_PULL"] = {
-          "time": Time.now,
-          "loc": Dir.pwd
-        }
-
-        File.write @app_config_path, data.to_json
-      rescue StandardError => ex
-        Whirly.stop if quiet
-        puts @pastel.red.bold "\nA fatal error occurred :-("
-        puts @pastel.red ex
-      ensure
-        exit
-      end
+      SiteExporter.new(@client, @sitename, data, @app_config_path)
+                  .export(quiet, last_pull_time, last_pull_loc)
     end
 
     def pizza
