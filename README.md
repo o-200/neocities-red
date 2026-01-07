@@ -62,3 +62,9 @@ client.delete(path)
 client.push(path)
 client.list(path)
 ```
+
+# Contributions ..?
+
+I'm glad to see everyone, so for contribution you need to check issues and take one typing something like "i'd like to take this issue". After that you should to make fork of this repository, create new branch and complete the task. 
+
+If there are no tasks, just ping me (o-200) at the new issue, and we will think about what can be implemented or fixed.
