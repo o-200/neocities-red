@@ -28,30 +28,20 @@ A CLI and library for using the Neocities API. Makes it easy to quickly upload, 
 
 ## Installation
 
-1. Download this repository:
-```bash
-git clone https://github.com/o-200/neocities-ruby.git
+```
+  gem install neocities-red
 ```
 
-2. Build gem:
-```bash
-gem build neocities.gemspec
-```
-
-3. Install gem: 
-```bash
-gem install neocities-1337.gem
-```
 ### Running
 
-After that, you are all set! Run `neocities` in a command line to see the options and get started.
+After that, you are all set! Run `neocities-red` in a command line to see the options and get started.
 
-## Neocities::Client
+## Gem modules
 
-This gem ships with Neocities::Client, which you can use to write code that interfaces with the Neocities API.
+This gem also transpose all processes to several class in lib/neocities, which could be used to write code that interfaces with the Neocities API.
 
 ```ruby
-require 'neocities'
+require 'neocities-red'
 
 # use api key
 params = {
@@ -72,7 +62,3 @@ client.delete(path)
 client.push(path)
 client.list(path)
 ```
-
-## Gem modules
-
-This gem also transpose all processes to several class in lib/neocities, which you also can use to write code.

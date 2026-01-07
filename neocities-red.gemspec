@@ -5,19 +5,22 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'neocities/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = 'neocities'
+  spec.name          = 'neocities-red'
   spec.version       = Neocities::VERSION
-  spec.authors       = ['Kyle Drake']
-  spec.email         = ['contact@neocities.org']
-  spec.summary       = 'Neocities.org CLI and API client'
-  spec.homepage      = 'https://neocities.org'
+  spec.authors       = ['Kyle Drake', 'o-200']
+  spec.summary       = 'Yet Another Neocities.org CLI and API client with improvements'
+  spec.homepage      = 'https://github.com/o-200/neocities-red'
   spec.license       = 'MIT'
-  spec.files         = `git ls-files | grep -Ev '^(test)'`.split("\n")
-  spec.executables   = ['neocities']
+
+  spec.files         = Dir.chdir(File.expand_path('..', __FILE__)) do
+    `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
+  end
+
+  spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
   spec.test_files    = spec.files.grep(%r{^(tests)/})
   spec.require_paths = ['lib']
   spec.extensions    = ['ext/mkrf_conf.rb']
-  spec.required_ruby_version = '>3.0.0'
+  spec.required_ruby_version = '>= 3.4.0'
 
   spec.add_dependency 'faraday', '~> 2.3', '>= 2.14.0'
   spec.add_dependency 'faraday-follow_redirects'
