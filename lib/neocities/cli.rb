@@ -447,7 +447,7 @@ HERE
 
   #{@pastel.green '$ neocities push --dry-run .'}                       Just show what would be uploaded
 
-  #{@pastel.green '$ neocities push --optimized .'}                      Do not upload unchanged files.#{' '}
+  #{@pastel.green '$ neocities push --optimized .'}                     Do not upload unchanged files.#{' '}
 
   #{@pastel.green '$ neocities push --prune .'}                         Delete site files not in dir (be careful!)
 
