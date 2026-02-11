@@ -10,7 +10,8 @@ require 'whirly'
 require 'digest'
 require 'time'
 
-# warning - the big quantity of working threads could be considered like-a DDOS. Your ip-address could get banned for a few days.
+# warning - the big quantity of working threads could be considered like-a DDOS.
+# Your ip-address could get banned for a few days.
 MAX_THREADS = 5
 
 module Neocities
@@ -315,17 +316,7 @@ module Neocities
     end
 
     def upload
-      display_upload_help_and_exit if @subargs.empty?
-
-      loop do
-        case @subargs[0]
-        when /^-/
-          puts @pastel.red.bold("Unknown option: #{@subargs[0].inspect}")
-          display_upload_help_and_exit
-        else
-          break
-        end
-      end
+      display_upload_help_and_exit if @subargs[0].nil? || @subargs[1].nil?
 
       if File.file?(@subargs[0])
         Services::FileUploader.new(@client, @subargs[0], @subargs[1]).upload
@@ -414,7 +405,10 @@ HERE
 
   #{@pastel.dim 'Examples:'}
 
-  #{@pastel.green '$ neocities upload /img.jpg /images/img2.jpg'} Upload img.jpg to /images folder and with img2.jpg name
+  #{@pastel.green '$ neocities upload ./img.jpg ./images/img2.jpg'} Upload img.jpg to /images folder and with img2.jpg name
+
+  #{@pastel.green '$ neocities upload images/ images/'} Upload images folder with their content to /images folder
+
 HERE
       exit
     end

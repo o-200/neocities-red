@@ -12,23 +12,23 @@ Currently or implementing new features `neocities-red` is easier than original c
 
 ### 1) upload
 
-The logic is different of original gem (please ensure that by typing the `neocities-red upload` command). Also it could upload folders recursively (It also upload the content that is inside of the target directory).
+- Uploading is multi-threaded (Instead of uploading by 1 file linnear it uploads 3-5 files at once.)
+- The logic is differs of original gem (please ensure that by typing the `neocities-red upload` command). 
+- Command also uploads folders recursively (It also upload the content that is inside of the target directory).
 
 ### 2) push
 
 Now, that command is great for users, which uses static site generators (like Jekyll, Hugo, e.t.c.).
 
-That command currently uses multithread uploading. Instead of uploading by 1 file linnear it downloads 3-5 files at once. That feature must be helpfull if you need to upload a lot of files.
-
+- Uploading is multi-threaded (Instead of uploading by 1 file linnear it uploads 3-5 files at once.)
 - `neocities push --optimized` command is uploads only files which differs of already uploaded.
 - `neocities push --ignore-dotfiles .` is ignores all files with '.' at the beginning.
 - `neocities push -e <folder>` is ignores folders recursively (Ignoring the content that is inside of the target directory).
 
 ## TODO'S:
-1) Change dependencies for modern analogs.
-2) Refactor `cli.rb` or use `rails/thor` gem instead.
-3) Add tests.
-4) Make sure that gem is compatible with Linux, Freebsd and Windows
+1) Refactor `cli.rb` or use `rails/thor` gem instead.
+2) Add tests.
+3) Make sure that gem is compatible with Linux, Freebsd and Windows
 
 # The Neocities Gem
 

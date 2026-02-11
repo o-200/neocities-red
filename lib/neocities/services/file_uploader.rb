@@ -3,7 +3,7 @@
 require 'pathname'
 require 'pastel'
 
-module Neocities::Services
+module Neocities
   module Services
     class FileIsNotExists < StandardError; end
 

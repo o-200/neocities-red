@@ -3,12 +3,16 @@
 require 'pathname'
 require 'pastel'
 
-module Neocities::Services
+module Neocities
   module Services
     class FileIsNotExists < StandardError; end
 
+    # warning - the big quantity of working threads could be considered like-a DDOS.
+    # Your ip-address could get banned for a few days.
+    MAX_THREADS = 5
+
     class FolderUploader
-      def initialize(client, filepath, remote_path = nil)
+      def initialize(client, filepath, remote_path)
         @client = client
         @filepath = filepath
         @remote_path = remote_path
@@ -26,11 +30,27 @@ module Neocities::Services
         end
 
         Dir.chdir(path) do
-          files = Dir.glob('**', File::FNM_DOTMATCH)[1..]
-          files.each do |file|
-            remote_path = File.join(@remote_path, file)
-            FileUploader.new(@client, file, remote_path).upload
+          files = Dir.glob('**/*', File::FNM_DOTMATCH).select { |f| File.file?(f) }
+
+          queue = Queue.new
+          files.each { |file| queue << file }
+
+          workers = Array.new(MAX_THREADS) do
+            Thread.new do
+              loop do
+                begin
+                  file = queue.pop(true)
+                rescue ThreadError
+                  break # queue is empty
+                end
+
+                remote_path = File.join(@remote_path, file)
+                FileUploader.new(@client, file, remote_path).upload
+              end
+            end
           end
+
+          workers.each(&:join)
         end
       end
     end
