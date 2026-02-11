@@ -8,7 +8,7 @@ Hello, there is a fork of [neocities-ruby gem](https://github.com/neocities/neoc
 
 ### 0) Refactor all entire project, change dependencies for more flexibility.
 
-Currently or implementing new features `neocities-red` is easier than original cli. Also i approaching the philosophy to use modern dependencies to ensure that `neocities-red` will supports newest versions of Ruby.
+Currently, implementing new features in `neocities-red` is easier than at original cli. Also i approaching the philosophy to use modern dependencies to ensure that `neocities-red` will supports newest versions of Ruby.
 
 ### 1) upload
 
@@ -21,8 +21,8 @@ Currently or implementing new features `neocities-red` is easier than original c
 Now, that command is great for users, which uses static site generators (like Jekyll, Hugo, e.t.c.).
 
 - Uploading is multi-threaded (Instead of uploading by 1 file linnear it uploads 3-5 files at once.)
-- `neocities push --optimized` command is uploads only files which differs of already uploaded.
-- `neocities push --ignore-dotfiles .` is ignores all files with '.' at the beginning.
+- `neocities push --optimized` command is uploads only files which differs or missing.
+- `neocities push --ignore-dotfiles .` is ignores all files/directories with '.' at the beginning.
 - `neocities push -e <folder>` is ignores folders recursively (Ignoring the content that is inside of the target directory).
 
 ## TODO'S:
