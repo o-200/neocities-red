@@ -2,26 +2,33 @@
 
 Hello, there is a fork of [neocities-ruby gem](https://github.com/neocities/neocities-ruby) with my own features and implementations. A much of my changes doesn't make sense to be pushed into original repository, so i pushed it here.
 
-## Main changes/Features:
+### Currently, neocities-red tests and develop with ruby 3.4.* and supports 4.*
 
-### Currently, this gems tests with ruby 3.4.*, it doesn't supports ruby 4 due of dependencies
+## List of improvements and changes:
 
-1) Added MultiThread uploading of files to neocities. This feature boosts `neocities push`;
-2) Moves from `http.rb` to `faraday` gem;
-3) Fixed `-e` flag to exclude folders recursively;
-4) Added `--ignore-dotfiles` to ignore all files-folders starts with '.';
-5) Added `--optimized` for `neocities push` flag to upload only modified files;
-6) Fixed bug with neocities info on modern rubies;
-7) Re-designed `upload` method logic;
-8) upload method also could upload folders with their content;
+### 0) Refactor all entire project, change dependencies for more flexibility.
+
+Currently or implementing new features `neocities-red` is easier than original cli. Also i approaching the philosophy to use modern dependencies to ensure that `neocities-red` will supports newest versions of Ruby.
+
+### 1) upload
+
+The logic is different of original gem (please ensure that by typing the `neocities-red upload` command). Also it could upload folders recursively (It also upload the content that is inside of the target directory).
+
+### 2) push
+
+Now, that command is great for users, which uses static site generators (like Jekyll, Hugo, e.t.c.).
+
+That command currently uses multithread uploading. Instead of uploading by 1 file linnear it downloads 3-5 files at once. That feature must be helpfull if you need to upload a lot of files.
+
+- `neocities push --optimized` command is uploads only files which differs of already uploaded.
+- `neocities push --ignore-dotfiles .` is ignores all files with '.' at the beginning.
+- `neocities push -e <folder>` is ignores folders recursively (Ignoring the content that is inside of the target directory).
 
 ## TODO'S:
-1) Check all entire cli and client logic, fix bugs.
-2) Change dependencies for modern analogs.
-3) Refactor `cli.rb` or use `rails/thor` gem instead.
-4) Add tests
-5) Make sure that gem is compatible with Linux, Freebsd, Windows
-6) Make it compatible with ruby 4.0.0
+1) Change dependencies for modern analogs.
+2) Refactor `cli.rb` or use `rails/thor` gem instead.
+3) Add tests.
+4) Make sure that gem is compatible with Linux, Freebsd and Windows
 
 # The Neocities Gem
 
@@ -29,8 +36,14 @@ A CLI and library for using the Neocities API. Makes it easy to quickly upload, 
 
 ## Installation
 
-```
-  gem install neocities-red
+1) Install Ruby Programming Language to your system. 
+- If you're not a programmer - just install version directly from https://www.ruby-lang.org/en/.
+- If you're programmes, just use any of tools which supports programming language supports. I am prefer to use `asdf` of `mise`.
+
+2) Install gem just typing:
+
+```bash
+gem install neocities-red
 ```
 
 ### Running
@@ -66,6 +79,6 @@ client.list(path)
 
 # Contributions ..?
 
-I'm glad to see everyone, so for contribution you need to check issues and take one typing something like "i'd like to take this issue". After that you should to make fork of this repository, create new branch and complete the task. 
+I'm glad to see everyone, so for contribution you need to check issues and take one typing something like "i'd like to take this issue". After that you should to make fork of this repository, create new branch, complete the task and share with solution via pull request. 
 
-If there are no tasks, just ping me (o-200) at the new issue, and we will think about what can be implemented or fixed.
+If there are no tasks, just ping me (o-200) for the new issue, and we will think together about what can be implemented or fixed.
