@@ -3,7 +3,7 @@
 require 'time'
 require 'pastel'
 
-module Neocities
+module Neocities::Services
   class ClientError < StandardError; end
 
   class ProfileInfo

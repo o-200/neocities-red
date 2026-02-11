@@ -3,7 +3,7 @@
 require 'pastel'
 require 'tty/table'
 
-module Neocities
+module Neocities::Services
   class FileList
     def initialize(client, path, detail)
       @client = client

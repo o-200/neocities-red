@@ -116,7 +116,7 @@ module Neocities
       display_delete_help_and_exit if @subargs.empty?
 
       @subargs.each do |path|
-        FileRemover.new(@client, path).remove
+        Services::FileRemover.new(@client, path).remove
       end
     end
 
@@ -145,7 +145,7 @@ module Neocities
     end
 
     def info
-      profile_info = ProfileInfo.new(@client, @subargs, @sitename).pretty_print
+      profile_info = Services::ProfileInfo.new(@client, @subargs, @sitename).pretty_print
       puts TTY::Table.new(profile_info)
     rescue Exception => e
       display_response(e)
@@ -160,7 +160,7 @@ module Neocities
 
       path = @subargs[0]
 
-      FileList.new(@client, path, @detail).show
+      Services::FileList.new(@client, path, @detail).show
     end
 
     def push
@@ -304,7 +304,7 @@ module Neocities
               end
               next if path.nil? || path.directory?
 
-              Neocities::FileUploader.new(@client, path, path).upload
+              Services::FileUploader.new(@client, path, path).upload
             end
           end
         end
@@ -328,9 +328,9 @@ module Neocities
       end
 
       if File.file?(@subargs[0])
-        FileUploader.new(@client, @subargs[0], @subargs[1]).upload
+        Services::FileUploader.new(@client, @subargs[0], @subargs[1]).upload
       elsif File.directory?(@subargs[0])
-        FolderUploader.new(@client, @subargs[0], @subargs[1]).upload
+        Services::FolderUploader.new(@client, @subargs[0], @subargs[1]).upload
       end
     end
 
@@ -341,8 +341,8 @@ module Neocities
       last_pull_time = data['LAST_PULL']['time']
       last_pull_loc = data['LAST_PULL']['loc']
 
-      SiteExporter.new(@client, @sitename, data, @app_config_path)
-                  .export(quiet, last_pull_time, last_pull_loc)
+      Services::SiteExporter.new(@client, @sitename, data, @app_config_path)
+                            .export(quiet, last_pull_time, last_pull_loc)
     end
 
     # only for development purposes
@@ -367,7 +367,7 @@ module Neocities
     end
 
     def display_pizza_help_and_exit
-      puts Pizza.new.make_order
+      puts Services::Pizza.new.make_order
     end
 
     def display_list_help_and_exit

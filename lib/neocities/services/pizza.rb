@@ -2,7 +2,7 @@
 
 require 'pastel'
 
-module Neocities
+module Neocities::Services
   class Pizza
     EXCUSES = [
       "Sorry, we're fresh out of pineapple today.",

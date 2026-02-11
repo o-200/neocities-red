@@ -3,7 +3,7 @@
 require 'whirly'
 require 'pastel'
 
-module Neocities
+module Neocities::Services
   class SiteExporter
     attr_accessor :client, :sitename, :data, :app_config_path
 
