@@ -92,7 +92,7 @@ client = Neocities::Client.new(sitename: 'o200' , password: 'my-super-duper-pass
 detail = true
 path = '.'
 
-Neocities::Services::FileList.new().show
+Neocities::Services::FileList.new(client, path, detail).show
 
 # [
 #   {
