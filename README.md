@@ -111,3 +111,5 @@ Neocities::Services::FileList.new(client, path, detail).show
 I'm glad to see everyone, so for contribution you need to check issues and take one typing something like "i'd like to take this issue". After that you should to make fork of this repository, create new branch, complete the task and share with solution via pull request. 
 
 If there are no tasks, just ping me (o-200) for the new issue, and we will think together about what can be implemented or fixed.
+
+Also, before contribution, please read [CONTRIBUTING.md](CONTRIBUTING.md)
