@@ -1,10 +1,18 @@
+[<img src="https://yesterhost.neocities.org/archive/buttons/button258.png" />](https://neocities.org)
+[<img src="https://img.shields.io/badge/Ruby-CC342D?style=flat&logo=ruby&logoColor=white" />]()
+[![Gem Version](https://badge.fury.io/rb/neocities-red.svg)](https://badge.fury.io/rb/neocities-red)
+[![Made With Love](https://img.shields.io/badge/Made%20With-Love-orange.svg)]()
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 # Neocities Red
 
 Hello, there is a fork of [neocities-ruby gem](https://github.com/neocities/neocities-ruby) with my own features and implementations. A much of my changes doesn't make sense to be pushed into original repository, so i pushed it here.
 
-### Currently, neocities-red tests and develop with ruby 3.4.* and supports 4.*
+# The Neocities Gem
 
-## List of improvements and changes:
+A CLI and library for using the Neocities API. Makes it easy to quickly upload, push, delete, and list your Neocities site.
+
+## List of improvements/changes:
 
 ### 0) Refactor all entire project, change dependencies for more flexibility.
 
@@ -13,7 +21,7 @@ Currently, implementing new features in `neocities-red` is easier than at origin
 ### 1) upload
 
 - Uploading is multi-threaded (Instead of uploading by 1 file linnear it uploads 3-5 files at once.)
-- The logic is differs of original gem (please ensure that by typing the `neocities-red upload` command). 
+- The logic is differs of original gem. 
 - Command also uploads folders recursively (It also upload the content that is inside of the target directory).
 
 ### 2) push
@@ -21,24 +29,24 @@ Currently, implementing new features in `neocities-red` is easier than at origin
 Now, that command is great for users, which uses static site generators (like Jekyll, Hugo, e.t.c.).
 
 - Uploading is multi-threaded (Instead of uploading by 1 file linnear it uploads 3-5 files at once.)
-- `neocities push --optimized` command is uploads only files which differs or missing.
+- `neocities push --optimized .` command is uploads only files which differs or missing.
 - `neocities push --ignore-dotfiles .` is ignores all files/directories with '.' at the beginning.
-- `neocities push -e <folder>` is ignores folders recursively (Ignoring the content that is inside of the target directory).
+- `neocities push -e <folder> .` is ignores folders recursively (Ignoring the content that is inside of the target directory).
 
 ## TODO'S:
+
 1) Refactor `cli.rb` or use `rails/thor` gem instead.
 2) Add tests.
 3) Make sure that gem is compatible with Linux, Freebsd and Windows
 
-# The Neocities Gem
-
-A CLI and library for using the Neocities API. Makes it easy to quickly upload, push, delete, and list your Neocities site.
-
 ## Installation
+
+#### Currently, neocities-red tests and develop with ruby 3.4.* and supports 4.*
+
 
 1) Install Ruby Programming Language to your system. 
 - If you're not a programmer - just install version directly from https://www.ruby-lang.org/en/.
-- If you're programmes, just use any of tools which supports programming language supports. I am prefer to use `asdf` of `mise`.
+- If you're programmer - just use any of tools to install Ruby. I am prefer to use `asdf` of `mise`.
 
 2) Install gem just typing:
 
@@ -75,6 +83,27 @@ client.info(sitename)
 client.delete(path)
 client.push(path)
 client.list(path)
+```
+
+Also, you can use specific service for your needs:
+
+```ruby
+client = Neocities::Client.new(sitename: 'o200' , password: 'my-super-duper-password') 
+detail = true
+path = '.'
+
+Neocities::Services::FileList.new().show
+
+# [
+#   {
+#     path: "assets", 
+#     is_directory: true, 
+#     created_at: "Sat, 07 Feb 2026 12:26:51 -0000", 
+#     updated_at: "Sat, 07 Feb 2026 12:26:51 -0000"
+#   },
+#   ...
+# ]
+
 ```
 
 # Contributions ..?
