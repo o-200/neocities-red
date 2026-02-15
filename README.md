@@ -12,6 +12,24 @@ Hello, there is a fork of [neocities-ruby gem](https://github.com/neocities/neoc
 
 A CLI and library for using the Neocities API. Makes it easy to quickly upload, push, delete, and list your Neocities site.
 
+#### Currently, neocities-red tests and develop with ruby 3.4.* and supports 4.*
+
+## Installation
+
+1) Install Ruby Programming Language to your system. 
+- If you're not a programmer - just install version directly from https://www.ruby-lang.org/en/.
+- If you're programmer - just use any of tools to install Ruby. I am prefer to use `asdf` of `mise`.
+
+2) Install gem just typing:
+
+```bash
+gem install neocities-red
+```
+
+### Running
+
+After that, you are all set! Run `neocities-red` in a command line to see the options and get started.
+
 ## List of improvements/changes:
 
 ### 0) Refactor all entire project, change dependencies for more flexibility.
@@ -39,24 +57,6 @@ Now, that command is great for users, which uses static site generators (like Je
 2) Add tests.
 3) Make sure that gem is compatible with Linux, Freebsd and Windows
 
-## Installation
-
-#### Currently, neocities-red tests and develop with ruby 3.4.* and supports 4.*
-
-
-1) Install Ruby Programming Language to your system. 
-- If you're not a programmer - just install version directly from https://www.ruby-lang.org/en/.
-- If you're programmer - just use any of tools to install Ruby. I am prefer to use `asdf` of `mise`.
-
-2) Install gem just typing:
-
-```bash
-gem install neocities-red
-```
-
-### Running
-
-After that, you are all set! Run `neocities-red` in a command line to see the options and get started.
 
 ## Gem modules
 

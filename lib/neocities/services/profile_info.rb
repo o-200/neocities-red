@@ -19,7 +19,7 @@ module Neocities::Services
     def get_stats
       response = @client.info(@subargs[0] || @sitename)
 
-      raise ClientError, response if response[:result] == 'error'
+      raise Neocities::Services::ClientError, response if response[:result] == 'error'
 
       response
     end
