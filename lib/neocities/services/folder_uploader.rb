@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require 'pathname'
-require 'pastel'
+require "pathname"
+require "pastel"
 
 module Neocities
   module Services
@@ -30,7 +30,7 @@ module Neocities
         end
 
         Dir.chdir(path) do
-          Dir.glob('**/*', File::FNM_DOTMATCH)
+          Dir.glob("**/*", File::FNM_DOTMATCH)
              .select { |f| File.file?(f) }
         end
       end

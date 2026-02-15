@@ -1,25 +1,26 @@
 # frozen_string_literal: true
 
-require 'pastel'
+require "pastel"
 
-module Neocities::Services
-  class Pizza
-    EXCUSES = [
-      "Sorry, we're fresh out of pineapple today.",
-      'All the toppings just went rogue and are currently answering to no god.',
-      'Our bicycle delivery guy is out today for ska band practice.',
-      "Doughpocalypse now. Pizza's off until further notice.",
-      "Mamma mia! We're outta the cheesa.",
-      'The sauce of our youth ran dry. Pizza is off the menu for now.',
-      'There was this pizza place in Portland called Lonesomes that taped burned CDs of local bands to the pizza box. It was pretty dope.',
-      'No dough, no go, sorry joe.',
-      "I'll be right with you after I figure out how to center a div in CSS.",
-      'The pizza gods demand rest. Are the hunger pangs interrupting your game?',
-      'Our pizza chef currently has the high score on the Road Kings pinball machine, you dare disturb him?',
-      "Today's special: disappointment. Pizza unavailable.",
-      'Our last pizza became a perpetual motion machine, left the atmosphere and is flying through the heavens.',
-      'Ran out of oregano and optimism. See you next time.',
-      "WAR AND PEACE, BY LEO TOLSTOY, BOOK ONE: 1805, CHAPTER I  “Well, Prince, so Genoa and Lucca are now just family estates of the Buonapartes. But I warn you, if you don’t tell me that this means war, if you still try to defend the infamies and horrors perpetrated by that Antichrist—I really believe he is Antichrist—I will have nothing more to do with you and you are no longer my friend, no longer my ‘faithful slave,’ as you call yourself! But how do you do? I see I have frightened you—sit down and tell me all the news.”
+module Neocities
+  module Services
+    class Pizza
+      EXCUSES = [
+        "Sorry, we're fresh out of pineapple today.",
+        "All the toppings just went rogue and are currently answering to no god.",
+        "Our bicycle delivery guy is out today for ska band practice.",
+        "Doughpocalypse now. Pizza's off until further notice.",
+        "Mamma mia! We're outta the cheesa.",
+        "The sauce of our youth ran dry. Pizza is off the menu for now.",
+        "There was this pizza place in Portland called Lonesomes that taped burned CDs of local bands to the pizza box. It was pretty dope.",
+        "No dough, no go, sorry joe.",
+        "I'll be right with you after I figure out how to center a div in CSS.",
+        "The pizza gods demand rest. Are the hunger pangs interrupting your game?",
+        "Our pizza chef currently has the high score on the Road Kings pinball machine, you dare disturb him?",
+        "Today's special: disappointment. Pizza unavailable.",
+        "Our last pizza became a perpetual motion machine, left the atmosphere and is flying through the heavens.",
+        "Ran out of oregano and optimism. See you next time.",
+        "WAR AND PEACE, BY LEO TOLSTOY, BOOK ONE: 1805, CHAPTER I  “Well, Prince, so Genoa and Lucca are now just family estates of the Buonapartes. But I warn you, if you don’t tell me that this means war, if you still try to defend the infamies and horrors perpetrated by that Antichrist—I really believe he is Antichrist—I will have nothing more to do with you and you are no longer my friend, no longer my ‘faithful slave,’ as you call yourself! But how do you do? I see I have frightened you—sit down and tell me all the news.”
 
   It was in July, 1805, and the speaker was the well-known Anna Pávlovna Schérer, maid of honor and favorite of the Empress Márya Fëdorovna. With these words she greeted Prince Vasíli Kurágin, a man of high rank and importance, who was the first to arrive at her reception. Anna Pávlovna had had a cough for some days. She was, as she said, suffering from la grippe; grippe being then a new word in St. Petersburg, used only by the elite.
 
@@ -80,10 +81,11 @@ module Neocities::Services
   “Don’t joke; I mean to have a serious talk with you. Do you know I am dissatisfied with your younger son? Between ourselves” (and her face assumed its melancholy expression), “he was mentioned at Her Majesty’s and you were pitied....”
 
   The prince answered nothing, but she looked at him significantly, awaiting a reply. He frowned."
-    ].freeze
+      ].freeze
 
-    def make_order
-      Pastel.new.bright_red(EXCUSES.sample)
+      def make_order
+        Pastel.new.bright_red(EXCUSES.sample)
+      end
     end
   end
 end

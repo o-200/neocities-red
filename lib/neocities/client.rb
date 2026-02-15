@@ -1,25 +1,25 @@
 # frozen_string_literal: true
 
 begin
-  require 'openssl/win/root' if Gem.win_platform?
+  require "openssl/win/root" if Gem.win_platform?
 rescue StandardError
 end
 
-require 'json'
-require 'pathname'
-require 'uri'
-require 'digest'
-require 'pastel'
-require 'date'
-require 'whirly'
+require "json"
+require "pathname"
+require "uri"
+require "digest"
+require "pastel"
+require "date"
+require "whirly"
 
-require 'faraday'
-require 'faraday/multipart'
-require 'faraday/follow_redirects'
+require "faraday"
+require "faraday/multipart"
+require "faraday/follow_redirects"
 
 module Neocities
   class Client
-    API_URI = 'https://neocities.org/api/'
+    API_URI = "https://neocities.org/api/"
 
     def initialize(opts = {})
       @uri = URI.parse API_URI
@@ -33,27 +33,27 @@ module Neocities
       end
 
       unless opts[:api_key] || (opts[:sitename] && opts[:password])
-        raise ArgumentError, 'client requires a login (sitename/password) or an api_key'
+        raise ArgumentError, "client requires a login (sitename/password) or an api_key"
       end
 
       if opts[:api_key]
-        @conn.request(:authorization, 'Bearer', opts[:api_key])
+        @conn.request(:authorization, "Bearer", opts[:api_key])
       else
         @conn.request(:authorization, :basic, opts[:sitename], opts[:password])
       end
     end
 
     def list(path = nil)
-      get 'list', path: path
+      get "list", path: path
     end
 
     def pull(sitename, last_pull_time = nil, last_pull_loc = nil, quiet = true)
-      site_info = get 'info', sitename: sitename
+      site_info = get "info", sitename: sitename
 
-      raise ArgumentError, site_info[:message] if site_info[:result] == 'error'
+      raise ArgumentError, site_info[:message] if site_info[:result] == "error"
 
       # handle custom domains for supporter accounts
-      domain = if site_info[:info][:domain] && site_info[:info][:domain] != ''
+      domain = if site_info[:info][:domain] && site_info[:info][:domain] != ""
                  "https://#{site_info[:info][:domain]}/"
                else
                  "https://#{sitename}.neocities.org/"
@@ -65,20 +65,22 @@ module Neocities
       curr_dir = Dir.pwd
 
       # get list of files
-      resp = get 'list'
+      resp = get "list"
 
-      raise ArgumentError, resp[:message] if resp[:result] == 'error'
+      raise ArgumentError, resp[:message] if resp[:result] == "error"
 
       # fetch each file
       uri_parser = URI::Parser.new
       resp[:files].each do |file|
-        if !file[:is_directory]
+        if file[:is_directory]
+          FileUtils.mkdir_p file[:path].to_s
+        else
           print @pastel.bold("Pulling #{file[:path]} ... ") unless quiet
 
-          if last_pull_time && \
-             last_pull_loc && \
-             Time.parse(file[:updated_at]) <= Time.parse(last_pull_time) && \
-             last_pull_loc == curr_dir && \
+          if last_pull_time &&
+             last_pull_loc &&
+             Time.parse(file[:updated_at]) <= Time.parse(last_pull_time) &&
+             last_pull_loc == curr_dir &&
              File.exist?(file[:path]) # case when user deletes file
 
             # case when file hasn't been updated since last
@@ -94,14 +96,10 @@ module Neocities
             print "#{@pastel.green.bold 'SUCCESS'}\n" unless quiet
             success_loaded += 1
 
-            File.open(file[:path].to_s, 'w') do |f|
-              f.write(fileconts.body)
-            end
+            File.write(file[:path].to_s, fileconts.body)
           elsif !quiet
             print "#{@pastel.red.bold 'FAIL'}\n"
           end
-        else
-          FileUtils.mkdir_p file[:path].to_s
         end
       end
 
@@ -116,11 +114,11 @@ module Neocities
     end
 
     def key
-      get 'key'
+      get "key"
     end
 
     def upload_hash(remote_path, sha1_hash)
-      post 'upload_hash', remote_path => sha1_hash
+      post "upload_hash", remote_path => sha1_hash
     end
 
     def upload(path, remote_path = nil, dry_run = false)
@@ -132,31 +130,31 @@ module Neocities
 
       if res[:files] && res[:files][remote_path.to_s.to_sym] == true
         {
-          result: 'error',
-          error_type: 'file_exists',
-          message: 'file already exists and matches local file, not uploading'
+          result: "error",
+          error_type: "file_exists",
+          message: "file already exists and matches local file, not uploading"
         }
       else
-        return { result: 'success' } if dry_run
+        return { result: "success" } if dry_run
 
         File.open(path.to_s) do |file|
-          post 'upload', rpath.to_s => Faraday::Multipart::FilePart.new(file, 'text/html')
+          post "upload", rpath.to_s => Faraday::Multipart::FilePart.new(file, "text/html")
         end
       end
     end
 
     def delete_wrapper_with_dry_run(paths, dry_run = false)
-      return { result: 'success' } if dry_run
+      return { result: "success" } if dry_run
 
       delete(paths)
     end
 
     def delete(*paths)
-      post 'delete', 'filenames' => paths
+      post "delete", "filenames" => paths
     end
 
     def info(sitename)
-      get 'info', sitename: sitename
+      get "info", sitename: sitename
     end
 
     def get(path, params = {})

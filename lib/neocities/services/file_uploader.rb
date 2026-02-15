@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require 'pathname'
-require 'pastel'
+require "pathname"
+require "pastel"
 
 module Neocities
   module Services
@@ -28,12 +28,12 @@ module Neocities
         puts @pastel.bold("Uploading #{path} to #{@remote_path} ...")
 
         response = @client.upload(path, @remote_path)
-        puts response if response[:result] == 'error'
+        puts response if response[:result] == "error"
 
-        if response[:result] == 'error' && response[:error_type] == 'file_exists'
-          puts @pastel.yellow.bold('EXISTS')
-        elsif response[:result] == 'success'
-          puts @pastel.green.bold('SUCCESS')
+        if response[:result] == "error" && response[:error_type] == "file_exists"
+          puts @pastel.yellow.bold("EXISTS")
+        elsif response[:result] == "success"
+          puts @pastel.green.bold("SUCCESS")
         end
 
         response

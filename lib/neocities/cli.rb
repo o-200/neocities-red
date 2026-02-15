@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
-require 'pathname'
-require 'pastel'
-require 'tty/table'
-require 'tty/prompt'
-require 'fileutils'
-require 'json'
-require 'whirly'
-require 'digest'
-require 'time'
+require "pathname"
+require "pastel"
+require "tty/table"
+require "tty/prompt"
+require "fileutils"
+require "json"
+require "whirly"
+require "digest"
+require "time"
 
 # warning - the big quantity of working threads could be considered like-a DDOS.
 # Your ip-address could get banned for a few days.
@@ -17,7 +17,7 @@ MAX_THREADS = 5
 module Neocities
   class CLI
     SUBCOMMANDS = %w[upload delete list info push logout pizza pull purge].freeze
-    HELP_SUBCOMMANDS = ['-h', '--help', 'help'].freeze
+    HELP_SUBCOMMANDS = ["-h", "--help", "help"].freeze
     PENELOPE_MOUTHS = %w[^ o ~ - v U].freeze
     PENELOPE_EYES = %w[o ~ O].freeze
 
@@ -27,8 +27,8 @@ module Neocities
       @subcmd = @argv.first
       @subargs = @argv[1..@argv.length]
       @prompt = TTY::Prompt.new
-      @api_key = ENV['NEOCITIES_API_KEY'] || nil
-      @app_config_path = File.join self.class.app_config_path('neocities'), 'config.json'
+      @api_key = ENV["NEOCITIES_API_KEY"] || nil
+      @app_config_path = File.join self.class.app_config_path("neocities"), "config.json"
     end
 
     def display_response(resp)
@@ -38,9 +38,9 @@ module Neocities
         exit
       end
 
-      if resp[:result] == 'success'
+      if resp[:result] == "success"
         puts "#{@pastel.green.bold 'SUCCESS:'} #{resp[:message]}"
-      elsif resp[:result] == 'error' && resp[:error_type] == 'file_exists'
+      elsif resp[:result] == "error" && resp[:error_type] == "file_exists"
         out = "#{@pastel.yellow.bold 'EXISTS:'} #{resp[:message]}"
         out += " (#{resp[:error_type]})" if resp[:error_type]
         puts out
@@ -52,7 +52,7 @@ module Neocities
     end
 
     def run
-      if @argv[0] == 'version'
+      if @argv[0] == "version"
         puts Neocities::VERSION
         exit
       end
@@ -61,7 +61,7 @@ module Neocities
         send "display_#{@subargs[0]}_help_and_exit"
       elsif @subcmd.nil? || !SUBCOMMANDS.include?(@subcmd)
         display_help_and_exit
-      elsif @subargs.join('').match(HELP_SUBCOMMANDS.join('|')) && @subcmd != 'info'
+      elsif @subargs.join.match(HELP_SUBCOMMANDS.join("|")) && @subcmd != "info"
         send "display_#{@subcmd}_help_and_exit"
 
       end
@@ -72,9 +72,9 @@ module Neocities
           data = JSON.parse file
 
           if data
-            @api_key = data['API_KEY'].strip
-            @sitename = data['SITENAME']
-            @last_pull = data['LAST_PULL'] # Store the last time a pull was performed so that we only fetch from updated files
+            @api_key = data["API_KEY"].strip
+            @sitename = data["SITENAME"]
+            @last_pull = data["LAST_PULL"] # Store the last time a pull was performed so that we only fetch from updated files
           end
         rescue Errno::ENOENT
           @api_key = nil
@@ -82,11 +82,11 @@ module Neocities
       end
 
       if @api_key.nil?
-        puts 'Please login to get your API key:'
+        puts "Please login to get your API key:"
 
         if !@sitename && !@password
-          @sitename = @prompt.ask('sitename:', default: ENV['NEOCITIES_SITENAME'])
-          @password = @prompt.mask('password:', default: ENV['NEOCITIES_PASSWORD'])
+          @sitename = @prompt.ask("sitename:", default: ENV.fetch("NEOCITIES_SITENAME", nil))
+          @password = @prompt.mask("password:", default: ENV.fetch("NEOCITIES_PASSWORD", nil))
         end
 
         @client = Neocities::Client.new sitename: @sitename, password: @password
@@ -94,8 +94,8 @@ module Neocities
         resp = @client.key
         if resp[:api_key]
           conf = {
-            "API_KEY": resp[:api_key],
-            "SITENAME": @sitename
+            API_KEY: resp[:api_key],
+            SITENAME: @sitename
           }
 
           FileUtils.mkdir_p Pathname(@app_config_path).dirname
@@ -126,7 +126,7 @@ module Neocities
 
       loop do
         case @subargs[0]
-        when '-y'
+        when "-y"
           @subargs.shift
           confirmed = true
         when /^-/
@@ -139,7 +139,7 @@ module Neocities
 
       if confirmed
         FileUtils.rm @app_config_path
-        puts @pastel.bold('Your api key has been removed.')
+        puts @pastel.bold("Your api key has been removed.")
       else
         display_logout_help_and_exit
       end
@@ -155,9 +155,9 @@ module Neocities
     def list
       display_list_help_and_exit if @subargs.empty?
 
-      @detail = true if @subargs.delete('-d') == '-d'
+      @detail = true if @subargs.delete("-d") == "-d"
 
-      @subargs[0] = nil if @subargs.delete('-a')
+      @subargs[0] = nil if @subargs.delete("-a")
 
       path = @subargs[0]
 
@@ -175,29 +175,29 @@ module Neocities
 
       loop do
         case @subargs[0]
-        when '--no-gitignore'
+        when "--no-gitignore"
           @subargs.shift
           @no_gitignore = true
-        when '--ignore-dotfiles'
+        when "--ignore-dotfiles"
           @subargs.shift
           @ignore_dotfiles = true
-        when '-e'
+        when "-e"
           @subargs.shift
           filepath = Pathname.new(@subargs.shift).cleanpath.to_s
 
           if File.file?(filepath)
             @excluded_files.push(filepath)
           elsif File.directory?(filepath)
-            folder_files = Dir.glob(File.join(filepath, '**', '*'), File::FNM_DOTMATCH).push(filepath)
+            folder_files = Dir.glob(File.join(filepath, "**", "*"), File::FNM_DOTMATCH).push(filepath)
             @excluded_files += folder_files
           end
-        when '--dry-run'
+        when "--dry-run"
           @subargs.shift
           @dry_run = true
-        when '--prune'
+        when "--prune"
           @subargs.shift
           @prune = true
-        when '--optimized'
+        when "--optimized"
           @subargs.shift
           @optimized = true
         when /^-/
@@ -209,23 +209,23 @@ module Neocities
       end
 
       if @subargs[0].nil?
-        display_response result: 'error', message: 'no local path provided'
+        display_response result: "error", message: "no local path provided"
         display_push_help_and_exit
       end
 
       root_path = Pathname @subargs[0]
 
       unless root_path.exist?
-        display_response result: 'error', message: "path #{root_path} does not exist"
+        display_response result: "error", message: "path #{root_path} does not exist"
         display_push_help_and_exit
       end
 
       unless root_path.directory?
-        display_response result: 'error', message: 'provided path is not a directory'
+        display_response result: "error", message: "provided path is not a directory"
         display_push_help_and_exit
       end
 
-      puts @pastel.green.bold('Doing a dry run, not actually pushing anything') if @dry_run
+      puts @pastel.green.bold("Doing a dry run, not actually pushing anything") if @dry_run
 
       if @prune
         pruned_dirs = []
@@ -240,7 +240,7 @@ module Neocities
           print @pastel.bold("Deleting #{file[:path]} ... ")
           resp = @client.delete_wrapper_with_dry_run file[:path], @dry_run
 
-          if resp[:result] == 'success'
+          if resp[:result] == "success"
             print "#{@pastel.green.bold('SUCCESS')}\n"
           else
             print "\n"
@@ -250,11 +250,11 @@ module Neocities
       end
 
       Dir.chdir(root_path) do
-        paths = Dir.glob(File.join('**', '*'), File::FNM_DOTMATCH)
+        paths = Dir.glob(File.join("**", "*"), File::FNM_DOTMATCH)
 
         if @no_gitignore == false
           begin
-            ignores = File.readlines('.gitignore').collect! do |ignore|
+            ignores = File.readlines(".gitignore").collect! do |ignore|
               ignore.strip!
               File.directory?(ignore) ? "#{ignore}**" : ignore
             end
@@ -267,12 +267,12 @@ module Neocities
                 end
               end
             end
-            puts 'Not pushing .gitignore entries (--no-gitignore to disable)'
+            puts "Not pushing .gitignore entries (--no-gitignore to disable)"
           rescue Errno::ENOENT
           end
         end
 
-        @excluded_files += paths.select { |path| path.start_with?('.') } if @ignore_dotfiles
+        @excluded_files += paths.select { |path| path.start_with?(".") } if @ignore_dotfiles
 
         # do not upload files which already uploaded (checking by sha1_hash)
         if @optimized
@@ -311,7 +311,7 @@ module Neocities
         end
 
         threads.each(&:join)
-        puts 'All files uploaded.'
+        puts "All files uploaded."
       end
     end
 
@@ -328,11 +328,11 @@ module Neocities
     end
 
     def pull
-      quiet = ['--quiet', '-q'].include?(@subargs[0])
+      quiet = ["--quiet", "-q"].include?(@subargs[0])
       file = File.read(@app_config_path)
       data = JSON.parse(file)
-      last_pull_time = data['LAST_PULL']['time']
-      last_pull_loc = data['LAST_PULL']['loc']
+      last_pull_time = data["LAST_PULL"]["time"]
+      last_pull_loc = data["LAST_PULL"]["loc"]
 
       Services::SiteExporter.new(@client, @sitename, data, @app_config_path)
                             .export(quiet, last_pull_time, last_pull_loc)
@@ -340,13 +340,12 @@ module Neocities
 
     # only for development purposes
     def purge
-      pruned_dirs = []
       resp = @client.list
       resp[:files].each do |file|
         print @pastel.bold("Deleting #{file[:path]} ... ")
         resp = @client.delete_wrapper_with_dry_run file[:path], @dry_run
 
-        if resp[:result] == 'success'
+        if resp[:result] == "success"
           print "#{@pastel.green.bold('SUCCESS')}\n"
         else
           print "\n"
@@ -521,19 +520,22 @@ HERE
 
       case platform
       when :linux
-        return File.join(ENV['XDG_CONFIG_HOME'], name) if ENV['XDG_CONFIG_HOME']
+        return File.join(ENV["XDG_CONFIG_HOME"], name) if ENV["XDG_CONFIG_HOME"]
 
-        File.join(ENV['HOME'], '.config', name) if ENV['HOME']
+        File.join(Dir.home, ".config", name) if Dir.home
       when :darwin
-        File.join(ENV['HOME'], 'Library', 'Application Support', name)
+        File.join(Dir.home, "Library", "Application Support", name)
       else
         # Windows platform detection is weird, just look for the env variables
-        return File.join(ENV['LOCALAPPDATA'], name) if ENV['LOCALAPPDATA']
+        return File.join(ENV["LOCALAPPDATA"], name) if ENV["LOCALAPPDATA"]
 
-        return File.join(ENV['USERPROFILE'], 'Local Settings', 'Application Data', name) if ENV['USERPROFILE']
+        if ENV["USERPROFILE"]
+          return File.join(ENV["USERPROFILE"], "Local Settings", "Application Data",
+                           name)
+        end
 
         # Should work for the BSDs
-        File.join(ENV['HOME'], ".#{name}") if ENV['HOME']
+        File.join(Dir.home, ".#{name}") if Dir.home
       end
     end
   end
