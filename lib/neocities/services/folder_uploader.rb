@@ -19,8 +19,8 @@ module Neocities
         @pastel = Pastel.new(eachline: "\n")
       end
 
-      def upload
-        path = Pathname(@filepath)
+      def get_files
+        path = Pathname.new(File.expand_path(@filepath))
 
         raise FileIsNotExists, "#{path} does not exist locally." unless path.exist?
 
@@ -30,28 +30,35 @@ module Neocities
         end
 
         Dir.chdir(path) do
-          files = Dir.glob('**/*', File::FNM_DOTMATCH).select { |f| File.file?(f) }
+          Dir.glob('**/*', File::FNM_DOTMATCH)
+             .select { |f| File.file?(f) }
+        end
+      end
 
-          queue = Queue.new
-          files.each { |file| queue << file }
+      def upload(files_list, threads = MAX_THREADS)
+        base = File.expand_path(@filepath)
 
-          workers = Array.new(MAX_THREADS) do
-            Thread.new do
-              loop do
-                begin
-                  file = queue.pop(true)
-                rescue ThreadError
-                  break # queue is empty
-                end
+        queue = Queue.new
+        files_list.each { |file| queue << file }
 
-                remote_path = File.join(@remote_path, file)
-                FileUploader.new(@client, file, remote_path).upload
+        workers = Array.new(threads) do
+          Thread.new do
+            loop do
+              begin
+                file = queue.pop(true)
+              rescue ThreadError
+                break
               end
+
+              local_path  = File.join(base, file)
+              remote_path = File.join(@remote_path, file)
+
+              FileUploader.new(@client, local_path, remote_path).upload
             end
           end
-
-          workers.each(&:join)
         end
+
+        workers.each(&:join)
       end
     end
   end

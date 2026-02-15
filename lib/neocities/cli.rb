@@ -321,7 +321,9 @@ module Neocities
       if File.file?(@subargs[0])
         Services::FileUploader.new(@client, @subargs[0], @subargs[1]).upload
       elsif File.directory?(@subargs[0])
-        Services::FolderUploader.new(@client, @subargs[0], @subargs[1]).upload
+        folder_uploader = Services::FolderUploader.new(@client, @subargs[0], @subargs[1])
+        files_list = folder_uploader.get_files
+        folder_uploader.upload(files_list)
       end
     end
 
