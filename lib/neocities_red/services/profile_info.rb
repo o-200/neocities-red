@@ -3,7 +3,7 @@
 require "time"
 require "pastel"
 
-module Neocities
+module NeocitiesRed
   module Services
     class ClientError < StandardError; end
 
@@ -20,7 +20,7 @@ module Neocities
       def get_stats
         response = @client.info(@subargs[0] || @sitename)
 
-        raise Neocities::Services::ClientError, response if response[:result] == "error"
+        raise NeocitiesRed::Services::ClientError, response if response[:result] == "error"
 
         response
       end

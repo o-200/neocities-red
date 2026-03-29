@@ -2,7 +2,7 @@
 
 require "pastel"
 
-module Neocities
+module NeocitiesRed
   module Services
     class FileRemover
       attr_accessor :client, :filepath

@@ -2,11 +2,11 @@
 
 lib = File.expand_path("lib", __dir__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require "neocities/version"
+require "neocities_red/version"
 
 Gem::Specification.new do |spec|
   spec.name          = "neocities-red"
-  spec.version       = Neocities::VERSION
+  spec.version       = NeocitiesRed::VERSION
   spec.authors       = ["Kyle Drake", "o-200"]
   spec.summary       = "Yet Another Neocities.org CLI and API client with improvements"
   spec.homepage      = "https://github.com/o-200/neocities-red"

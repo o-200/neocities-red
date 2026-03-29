@@ -17,7 +17,7 @@ require "faraday"
 require "faraday/multipart"
 require "faraday/follow_redirects"
 
-module Neocities
+module NeocitiesRed
   class Client
     API_URI = "https://neocities.org/api/"
 

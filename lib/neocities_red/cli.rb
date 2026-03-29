@@ -14,7 +14,7 @@ require "time"
 # Your ip-address could get banned for a few days.
 MAX_THREADS = 5
 
-module Neocities
+module NeocitiesRed
   class CLI
     SUBCOMMANDS = %w[upload delete list info push logout pizza pull purge].freeze
     HELP_SUBCOMMANDS = ["-h", "--help", "help"].freeze
@@ -89,7 +89,7 @@ module Neocities
           @password = @prompt.mask("password:", default: ENV.fetch("NEOCITIES_PASSWORD", nil))
         end
 
-        @client = Neocities::Client.new sitename: @sitename, password: @password
+        @client = NeocitiesRed::Client.new sitename: @sitename, password: @password
 
         resp = @client.key
         if resp[:api_key]
@@ -107,7 +107,7 @@ module Neocities
           exit
         end
       else
-        @client = Neocities::Client.new api_key: @api_key
+        @client = NeocitiesRed::Client.new api_key: @api_key
       end
 
       send @subcmd

@@ -1,6 +1,9 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require File.join(File.dirname(__FILE__), '..', 'lib', 'neocities')
-cli = Neocities::CLI.new ARGV
-cli.run
+lib = File.expand_path("../lib", __dir__)
+$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+
+require "neocities_red"
+
+NeocitiesRed::CLI.new(ARGV).run
