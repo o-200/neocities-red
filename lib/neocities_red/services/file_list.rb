@@ -13,6 +13,17 @@ module NeocitiesRed
         @pastel = Pastel.new(eachline: "\n")
       end
 
+      def get_list
+        resp = @client.list(@path)
+
+        if resp[:result] == "error"
+          display_response resp
+          exit
+        end
+
+        resp[:files]
+      end
+
       def show
         resp = @client.list(@path)
 
@@ -39,9 +50,11 @@ module NeocitiesRed
           puts TTY::Table.new(out)
         end
 
-        resp[:files].each do |file|
-          puts @pastel.send(file[:is_directory] ? :blue : :green).bold(file[:path])
+        resp[:files].map do |file|
+          @pastel.send(file[:is_directory] ? :blue : :green).bold(file[:path])
         end
+
+        resp[:files]
       end
     end
   end

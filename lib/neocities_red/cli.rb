@@ -16,7 +16,7 @@ MAX_THREADS = 5
 
 module NeocitiesRed
   class CLI
-    SUBCOMMANDS = %w[upload delete list info push logout pizza pull purge].freeze
+    SUBCOMMANDS = %w[upload delete list info push logout pizza pull purge diff].freeze
     HELP_SUBCOMMANDS = ["-h", "--help", "help"].freeze
     PENELOPE_MOUTHS = %w[^ o ~ - v U].freeze
     PENELOPE_EYES = %w[o ~ O].freeze
@@ -113,6 +113,28 @@ module NeocitiesRed
       send @subcmd
     end
 
+    def diff
+      display_diff_help_and_exit if @subargs.empty?
+      added, modified, removed = Services::SiteDifference.new(@client, @subargs[0], false).show
+
+      # rubocop:disable Style/GuardClause
+      if removed.any?
+        puts @pastel.bold.red("Removed files")
+        puts removed
+      end
+
+      if modified.any?
+        puts @pastel.bold.yellow("Modified files")
+        puts modified
+      end
+
+      if added.any?
+        puts @pastel.bold.green("New files")
+        puts added
+      end
+      # rubocop:enable Style/GuardClause
+    end
+
     def delete
       display_delete_help_and_exit if @subargs.empty?
 
@@ -161,7 +183,7 @@ module NeocitiesRed
 
       path = @subargs[0]
 
-      Services::FileList.new(@client, path, @detail).show
+      puts Services::FileList.new(@client, path, @detail).show
     end
 
     def push
@@ -370,11 +392,11 @@ module NeocitiesRed
 
   #{@pastel.dim 'Examples:'}
 
-  #{@pastel.green '$ neocities list /'}           List files in your root directory
+  #{@pastel.green '$ neocities-red list /'}           List files in your root directory
 
-  #{@pastel.green '$ neocities list -a'}          Recursively display all files and directories
+  #{@pastel.green '$ neocities-red list -a'}          Recursively display all files and directories
 
-  #{@pastel.green '$ neocities list -d /mydir'}   Show detailed information on /mydir
+  #{@pastel.green '$ neocities-red list -d /mydir'}   Show detailed information on /mydir
 
 HERE
       exit
@@ -388,11 +410,11 @@ HERE
 
   #{@pastel.dim 'Examples:'}
 
-  #{@pastel.green '$ neocities delete myfile.jpg'}               Delete myfile.jpg
+  #{@pastel.green '$ neocities-red delete myfile.jpg'}               Delete myfile.jpg
 
-  #{@pastel.green '$ neocities delete myfile.jpg myfile2.jpg'}   Delete myfile.jpg and myfile2.jpg
+  #{@pastel.green '$ neocities-red delete myfile.jpg myfile2.jpg'}   Delete myfile.jpg and myfile2.jpg
 
-  #{@pastel.green '$ neocities delete mydir'}                    Deletes mydir and everything inside it (be careful!)
+  #{@pastel.green '$ neocities-red delete mydir'}                    Deletes mydir and everything inside it (be careful!)
 
 HERE
       exit
@@ -406,9 +428,9 @@ HERE
 
   #{@pastel.dim 'Examples:'}
 
-  #{@pastel.green '$ neocities upload ./img.jpg ./images/img2.jpg'} Upload img.jpg to /images folder and with img2.jpg name
+  #{@pastel.green '$ neocities-red upload ./img.jpg ./images/img2.jpg'} Upload img.jpg to /images folder and with img2.jpg name
 
-  #{@pastel.green '$ neocities upload images/ images/'} Upload images folder with their content to /images folder
+  #{@pastel.green '$ neocities-red upload images/ images/'} Upload images folder with their content to /images folder
 
 HERE
       exit
@@ -432,20 +454,35 @@ HERE
 
   #{@pastel.dim 'Examples:'}
 
-  #{@pastel.green '$ neocities push .'}                                 Recursively upload current directory.
+  #{@pastel.green '$ neocities-red push .'}                                 Recursively upload current directory.
 
-  #{@pastel.green '$ neocities push -e node_modules -e secret.txt .'}   Exclude certain files from push
+  #{@pastel.green '$ neocities-red push -e node_modules -e secret.txt .'}   Exclude certain files from push
 
-  #{@pastel.green '$ neocities push --no-gitignore .'}                  Don't use .gitignore to exclude files
+  #{@pastel.green '$ neocities-red push --no-gitignore .'}                  Don't use .gitignore to exclude files
 
-  #{@pastel.green '$ neocities push --ignore-dotfiles .'}               Ignore files with '.' at the beginning (for example, '.git/')
+  #{@pastel.green '$ neocities-red push --ignore-dotfiles .'}               Ignore files with '.' at the beginning (for example, '.git/')
 
-  #{@pastel.green '$ neocities push --dry-run .'}                       Just show what would be uploaded
+  #{@pastel.green '$ neocities-red push --dry-run .'}                       Just show what would be uploaded
 
-  #{@pastel.green '$ neocities push --optimized .'}                     Do not upload unchanged files.#{' '}
+  #{@pastel.green '$ neocities-red push --optimized .'}                     Do not upload unchanged files.#{' '}
 
-  #{@pastel.green '$ neocities push --prune .'}                         Delete site files not in dir (be careful!)
+  #{@pastel.green '$ neocities-red push --prune .'}                         Delete site files not in dir (be careful!)
 
+HERE
+      exit
+    end
+
+    def display_diff_help_and_exit
+      display_banner
+
+      puts <<HERE
+  #{@pastel.green.bold 'diff'} - Compare local files with remote and show differences.
+
+  #{@pastel.dim 'Examples:'}
+
+  #{@pastel.green '$ neocities-red diff .'}                             Compare your current path with remote
+
+  #{@pastel.green '$ neocities-red diff ./my-website'}                  Compare ./my-website folder with remote
 HERE
       exit
     end
@@ -458,7 +495,7 @@ HERE
 
   #{@pastel.dim 'Examples:'}
 
-  #{@pastel.green '$ neocities info fauux'}   Gets info for 'fauux' site
+  #{@pastel.green '$ neocities-red info fauux'}   Gets info for 'fauux' site
 
 HERE
       exit
@@ -472,7 +509,7 @@ HERE
 
   #{@pastel.dim 'Examples:'}
 
-  #{@pastel.green '$ neocities logout -y'}
+  #{@pastel.green '$ neocities-red logout -y'}
 
 HERE
       exit
@@ -495,6 +532,7 @@ HERE
     push        Recursively upload a local directory to your site
     upload      Upload individual files to your Neocities site
     delete      Delete files from your Neocities site
+    diff        Measure difference from your local directory to your Neocities site
     list        List files from your Neocities site
     info        Information and stats for your site
     logout      Remove the site api key from the config

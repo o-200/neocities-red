@@ -9,6 +9,7 @@ require File.join(File.dirname(__FILE__), "neocities_red", "services", "folder_u
 require File.join(File.dirname(__FILE__), "neocities_red", "services", "file_remover")
 require File.join(File.dirname(__FILE__), "neocities_red", "services", "file_list")
 
+require File.join(File.dirname(__FILE__), "neocities_red", "services", "site_difference")
 require File.join(File.dirname(__FILE__), "neocities_red", "services", "profile_info")
 require File.join(File.dirname(__FILE__), "neocities_red", "services", "site_exporter")
 require File.join(File.dirname(__FILE__), "neocities_red", "services", "pizza")
