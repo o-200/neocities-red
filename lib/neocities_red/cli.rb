@@ -532,7 +532,7 @@ HERE
     push        Recursively upload a local directory to your site
     upload      Upload individual files to your Neocities site
     delete      Delete files from your Neocities site
-    diff        Measure difference from your local directory to your Neocities site
+    diff        Compare your local directory with your Neocities siteя
     list        List files from your Neocities site
     info        Information and stats for your site
     logout      Remove the site api key from the config
