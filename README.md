@@ -51,6 +51,10 @@ Now, that command is great for users, which uses static site generators (like Je
 - `neocities push --ignore-dotfiles .` is ignores all files/directories with '.' at the beginning.
 - `neocities push -e <folder> .` is ignores folders recursively (Ignoring the content that is inside of the target directory).
 
+### 3) diff
+
+You can compare your local version of website with remote version.
+
 ## TODO'S:
 
 1) Refactor `cli.rb` or use `rails/thor` gem instead.
