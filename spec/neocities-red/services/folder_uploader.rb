@@ -2,7 +2,7 @@
 
 require "fileutils"
 
-RSpec.describe Neocities::Services::FolderUploader do
+RSpec.describe NeocitiesRed::Services::FolderUploader do
   let(:client) { instance_double(NeocitiesClient) }
   let(:remote_path) { "ext/" }
 
