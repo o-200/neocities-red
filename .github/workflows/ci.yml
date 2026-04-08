@@ -16,7 +16,16 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: 4.0.0
-          bundler-cache: true
+
+      - name: Install dependencies
+        run: |
+          bundle config set frozen true
+          bundle install
+
+      - name: Debug versions
+        run: |
+          ruby -v
+          bundle exec rubocop -V
 
       - name: Run linter
         run: bundle exec rubocop
@@ -32,7 +41,11 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: 4.0.0
-          bundler-cache: true
+
+      - name: Install dependencies
+        run: |
+          bundle config set frozen true
+          bundle install
 
       - name: Run tests
         run: bundle exec rspec
