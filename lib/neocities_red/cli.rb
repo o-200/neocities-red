@@ -170,7 +170,7 @@ module NeocitiesRed
     def info
       profile_info = Services::ProfileInfo.new(@client, @subargs, @sitename).pretty_print
       puts TTY::Table.new(profile_info)
-    rescue Exception => e
+    rescue StandardError => e
       display_response(e)
     end
 
@@ -274,24 +274,17 @@ module NeocitiesRed
       Dir.chdir(root_path) do
         paths = Dir.glob(File.join("**", "*"), File::FNM_DOTMATCH)
 
-        if @no_gitignore == false
-          begin
-            ignores = File.readlines(".gitignore").collect! do |ignore|
-              ignore.strip!
-              File.directory?(ignore) ? "#{ignore}**" : ignore
-            end
-            paths.select! do |path|
-              res = true
-              ignores.each do |ignore|
-                if File.fnmatch?(ignore.strip, path)
-                  res = false
-                  break
-                end
-              end
-            end
-            puts "Not pushing .gitignore entries (--no-gitignore to disable)"
-          rescue Errno::ENOENT
+        if @no_gitignore == false && File.exist?(".gitignore")
+          ignores = File.readlines(".gitignore").map do |ignore|
+            ignore = ignore.strip
+            File.directory?(ignore) ? "#{ignore}**" : ignore
           end
+
+          paths.select! do |path|
+            ignores.none? { |ignore| File.fnmatch?(ignore, path) }
+          end
+
+          puts "Not pushing .gitignore entries (--no-gitignore to disable)"
         end
 
         @excluded_files += paths.select { |path| path.start_with?(".") } if @ignore_dotfiles
@@ -344,7 +337,7 @@ module NeocitiesRed
         Services::FileUploader.new(@client, @subargs[0], @subargs[1]).upload
       elsif File.directory?(@subargs[0])
         folder_uploader = Services::FolderUploader.new(@client, @subargs[0], @subargs[1])
-        files_list = folder_uploader.get_files
+        files_list = folder_uploader.files
         folder_uploader.upload(files_list)
       end
     end

@@ -8,11 +8,13 @@ require "pastel"
 RSpec.describe NeocitiesRed::Services::SiteDifference do
   subject(:service) { described_class.new(client, path, detail) }
 
-  let(:client) { instance_double("Client") }
+  let(:client) { instance_double(Client) }
   let(:path) { "/tmp/site" }
   let(:detail) { false }
 
+  # rubocop:disable RSpec/VerifiedDoubles
   let(:pastel) { double("Pastel") }
+  # rubocop:enable RSpec/VerifiedDoubles
 
   let(:file_list_service) do
     instance_double(
@@ -61,13 +63,13 @@ RSpec.describe NeocitiesRed::Services::SiteDifference do
       allow(File).to receive(:file?).with("assets").and_return(false)
 
       allow(Digest::SHA1).to receive(:file).with("index.html")
-                                           .and_return(instance_double("Digest::SHA1",
+                                           .and_return(instance_double(Digest::SHA1,
                                                                        hexdigest: "server-index-sha"))
       allow(Digest::SHA1).to receive(:file).with("about.html")
-                                           .and_return(instance_double("Digest::SHA1",
+                                           .and_return(instance_double(Digest::SHA1,
                                                                        hexdigest: "local-about-sha"))
       allow(Digest::SHA1).to receive(:file).with("contact.html")
-                                           .and_return(instance_double("Digest::SHA1",
+                                           .and_return(instance_double(Digest::SHA1,
                                                                        hexdigest: "local-contact-sha"))
 
       allow(pastel).to receive(:green) { |value| "GREEN(#{value})" }

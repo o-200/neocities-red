@@ -13,7 +13,7 @@ module NeocitiesRed
         @pastel = Pastel.new(eachline: "\n")
       end
 
-      def get_list
+      def list
         resp = @client.list(@path)
 
         if resp[:result] == "error"

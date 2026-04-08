@@ -24,10 +24,10 @@ RSpec.describe NeocitiesRed::Services::FolderUploader do
     FileUtils.rm_rf(tmp_root)
   end
 
-  describe "#get_files" do
+  describe "#files" do
     it "raises FileIsNotExists when the path does not exist" do
       uploader = described_class.new(client, File.join(tmp_root, "nope"), remote_path)
-      expect { uploader.get_files }.to raise_error(Neocities::Services::FileIsNotExists)
+      expect { uploader.files }.to raise_error(Neocities::Services::FileIsNotExists)
     end
 
     it "returns all files under the directory as relative paths, including dotfiles, excluding directories" do
@@ -40,7 +40,7 @@ RSpec.describe NeocitiesRed::Services::FolderUploader do
       FileUtils.mkdir_p(File.join(tmp_root, "ext/.hiddendir"))
 
       uploader = described_class.new(client, File.join(tmp_root, "ext"), remote_path)
-      expect(uploader.get_files).to contain_exactly("a.txt", "sub/b.txt", ".env", "sub/.keep")
+      expect(uploader.files).to contain_exactly("a.txt", "sub/b.txt", ".env", "sub/.keep")
     end
 
     it "accepts a relative directory path and returns files relative to that directory" do
@@ -49,7 +49,7 @@ RSpec.describe NeocitiesRed::Services::FolderUploader do
 
       Dir.chdir(tmp_root) do
         uploader = described_class.new(client, "./tmp_ext/", remote_path)
-        expect(uploader.get_files).to contain_exactly("root.rb", "sub/nested.rb")
+        expect(uploader.files).to contain_exactly("root.rb", "sub/nested.rb")
       end
     end
 
@@ -57,7 +57,7 @@ RSpec.describe NeocitiesRed::Services::FolderUploader do
       file_path = write_file("not_a_dir.txt", content: "hello")
       uploader = described_class.new(client, file_path, remote_path)
 
-      expect(uploader.get_files).to be_nil
+      expect(uploader.files).to be_nil
     end
   end
 end
