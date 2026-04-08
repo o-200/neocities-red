@@ -115,7 +115,54 @@ module NeocitiesRed
 
     def diff
       display_diff_help_and_exit if @subargs.empty?
-      added, modified, removed = Services::SiteDifference.new(@client, @subargs[0], false).show
+
+      @ignore_dotfiles = false
+      @path = "."
+      @exclude = []
+
+      loop do
+        arg = @subargs[0]
+        break if arg.nil?
+
+        if arg == "--ignore-dotfiles"
+          @subargs.shift
+          @ignore_dotfiles = true
+
+        elsif arg == "-e"
+          @subargs.shift
+
+          base = Pathname.new(@path).expand_path
+          target = Pathname.new(@subargs[0]).expand_path
+          filepath = target.relative_path_from(base).to_s
+
+          if File.file?(target)
+            @exclude << filepath
+          elsif File.directory?(target)
+            @exclude += Dir.glob(
+              File.join(target, "**", "*"),
+              File::FNM_DOTMATCH
+            ).map do |path|
+              Pathname.new(path).expand_path.relative_path_from(base).to_s
+            end
+
+            @exclude << filepath
+          end
+
+          @subargs.shift
+
+        elsif File.directory?(arg)
+          @path = arg
+          @subargs.shift
+        end
+      end
+
+      added, modified, removed = Services::SiteDifference.new(
+        @client,
+        path: @path,
+        detail: false,
+        ignore_dotfiles: @ignore_dotfiles,
+        exclude: @exclude
+      ).show
 
       # rubocop:disable Style/GuardClause
       if removed.any?
@@ -476,6 +523,10 @@ HERE
   #{@pastel.green '$ neocities-red diff .'}                             Compare your current path with remote
 
   #{@pastel.green '$ neocities-red diff ./my-website'}                  Compare ./my-website folder with remote
+
+  #{@pastel.green '$ neocities-red diff . --ignore-dotfile'}            Compare your current path with remote without any files starts with '.'
+
+  #{@pastel.green '$ neocities-red diff . -e file.png'}                 Compare your current path with remote without file.png
 HERE
       exit
     end

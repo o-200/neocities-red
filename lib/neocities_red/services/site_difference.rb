@@ -6,10 +6,12 @@ require "tty/table"
 module NeocitiesRed
   module Services
     class SiteDifference
-      def initialize(client, path, detail)
+      def initialize(client, path: ".", detail: false, ignore_dotfiles: false, exclude: [])
         @client = client
         @path = path
         @detail = detail || false
+        @ignore_dotfiles = ignore_dotfiles || false
+        @exclude = exclude || []
         @pastel = Pastel.new(eachline: "\n")
       end
 
@@ -38,6 +40,16 @@ module NeocitiesRed
 
           server_file_map = server_files.each_with_object({}) do |file, hash|
             hash[file[:path]] = file[:sha1_hash]
+          end
+
+          if @ignore_dotfiles
+            server_paths = server_paths.reject { |path| path.start_with?(".") }
+            local_paths = local_paths.reject { |path| path.start_with?(".") }
+          end
+
+          if @exclude.any?
+            server_paths -= @exclude
+            local_paths -= @exclude
           end
 
           removed_paths = server_paths - local_paths
