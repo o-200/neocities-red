@@ -5,7 +5,8 @@ require "rubygems/command"
 require "rubygems/dependency_installer"
 begin
   Gem::Command.build_args = ARGV
-rescue NoMethodError
+rescue NoMethodError => e
+  warn "Gem::Command.build_args= not available: #{e.message}"
 end
 inst = Gem::DependencyInstaller.new
 begin

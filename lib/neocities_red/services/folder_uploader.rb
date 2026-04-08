@@ -19,7 +19,7 @@ module NeocitiesRed
         @pastel = Pastel.new(eachline: "\n")
       end
 
-      def get_files
+      def files
         path = Pathname.new(File.expand_path(@filepath))
 
         raise FileIsNotExists, "#{path} does not exist locally." unless path.exist?

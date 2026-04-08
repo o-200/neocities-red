@@ -1,10 +1,6 @@
 # frozen_string_literal: true
 
-begin
-  require "openssl/win/root" if Gem.win_platform?
-rescue StandardError
-end
-
+require "openssl/win/root" if Gem.win_platform?
 require "json"
 require "pathname"
 require "uri"
@@ -32,9 +28,7 @@ module NeocitiesRed
         conn.response :follow_redirects
       end
 
-      unless opts[:api_key] || (opts[:sitename] && opts[:password])
-        raise ArgumentError, "client requires a login (sitename/password) or an api_key"
-      end
+      raise ArgumentError, "client requires a login (sitename/password) or an api_key" unless opts[:api_key] || (opts[:sitename] && opts[:password])
 
       if opts[:api_key]
         @conn.request(:authorization, "Bearer", opts[:api_key])
@@ -47,7 +41,7 @@ module NeocitiesRed
       get "list", path: path
     end
 
-    def pull(sitename, last_pull_time = nil, last_pull_loc = nil, quiet = true)
+    def pull(sitename, last_pull_time = nil, last_pull_loc = nil, quiet: true)
       site_info = get "info", sitename: sitename
 
       raise ArgumentError, site_info[:message] if site_info[:result] == "error"
@@ -121,7 +115,7 @@ module NeocitiesRed
       post "upload_hash", remote_path => sha1_hash
     end
 
-    def upload(path, remote_path = nil, dry_run = false)
+    def upload(path, remote_path = nil, dry_run: false)
       path = Pathname path
       raise ArgumentError, "#{path} does not exist." unless path.exist?
 
@@ -143,7 +137,7 @@ module NeocitiesRed
       end
     end
 
-    def delete_wrapper_with_dry_run(paths, dry_run = false)
+    def delete_wrapper_with_dry_run(paths, dry_run: false)
       return { result: "success" } if dry_run
 
       delete(paths)

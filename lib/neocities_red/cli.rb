@@ -16,7 +16,7 @@ MAX_THREADS = 5
 
 module NeocitiesRed
   class CLI
-    SUBCOMMANDS = %w[upload delete list info push logout pizza pull purge].freeze
+    SUBCOMMANDS = %w[upload delete list info push logout pizza pull purge diff].freeze
     HELP_SUBCOMMANDS = ["-h", "--help", "help"].freeze
     PENELOPE_MOUTHS = %w[^ o ~ - v U].freeze
     PENELOPE_EYES = %w[o ~ O].freeze
@@ -113,6 +113,75 @@ module NeocitiesRed
       send @subcmd
     end
 
+    def diff
+      display_diff_help_and_exit if @subargs.empty?
+
+      @ignore_dotfiles = false
+      @path = "."
+      @exclude = []
+
+      loop do
+        arg = @subargs[0]
+        break if arg.nil?
+
+        if arg == "--ignore-dotfiles"
+          @subargs.shift
+          @ignore_dotfiles = true
+
+        elsif arg == "-e"
+          @subargs.shift
+
+          base = Pathname.new(@path).expand_path
+          target = Pathname.new(@subargs[0]).expand_path
+          filepath = target.relative_path_from(base).to_s
+
+          if File.file?(target)
+            @exclude << filepath
+          elsif File.directory?(target)
+            @exclude += Dir.glob(
+              File.join(target, "**", "*"),
+              File::FNM_DOTMATCH
+            ).map do |path|
+              Pathname.new(path).expand_path.relative_path_from(base).to_s
+            end
+
+            @exclude << filepath
+          end
+
+          @subargs.shift
+
+        elsif File.directory?(arg)
+          @path = arg
+          @subargs.shift
+        end
+      end
+
+      added, modified, removed = Services::SiteDifference.new(
+        @client,
+        path: @path,
+        detail: false,
+        ignore_dotfiles: @ignore_dotfiles,
+        exclude: @exclude
+      ).show
+
+      # rubocop:disable Style/GuardClause
+      if removed.any?
+        puts @pastel.bold.red("Removed files")
+        puts removed
+      end
+
+      if modified.any?
+        puts @pastel.bold.yellow("Modified files")
+        puts modified
+      end
+
+      if added.any?
+        puts @pastel.bold.green("New files")
+        puts added
+      end
+      # rubocop:enable Style/GuardClause
+    end
+
     def delete
       display_delete_help_and_exit if @subargs.empty?
 
@@ -148,7 +217,7 @@ module NeocitiesRed
     def info
       profile_info = Services::ProfileInfo.new(@client, @subargs, @sitename).pretty_print
       puts TTY::Table.new(profile_info)
-    rescue Exception => e
+    rescue StandardError => e
       display_response(e)
     end
 
@@ -161,7 +230,7 @@ module NeocitiesRed
 
       path = @subargs[0]
 
-      Services::FileList.new(@client, path, @detail).show
+      puts Services::FileList.new(@client, path, @detail).show
     end
 
     def push
@@ -252,24 +321,17 @@ module NeocitiesRed
       Dir.chdir(root_path) do
         paths = Dir.glob(File.join("**", "*"), File::FNM_DOTMATCH)
 
-        if @no_gitignore == false
-          begin
-            ignores = File.readlines(".gitignore").collect! do |ignore|
-              ignore.strip!
-              File.directory?(ignore) ? "#{ignore}**" : ignore
-            end
-            paths.select! do |path|
-              res = true
-              ignores.each do |ignore|
-                if File.fnmatch?(ignore.strip, path)
-                  res = false
-                  break
-                end
-              end
-            end
-            puts "Not pushing .gitignore entries (--no-gitignore to disable)"
-          rescue Errno::ENOENT
+        if @no_gitignore == false && File.exist?(".gitignore")
+          ignores = File.readlines(".gitignore").map do |ignore|
+            ignore = ignore.strip
+            File.directory?(ignore) ? "#{ignore}**" : ignore
           end
+
+          paths.select! do |path|
+            ignores.none? { |ignore| File.fnmatch?(ignore, path) }
+          end
+
+          puts "Not pushing .gitignore entries (--no-gitignore to disable)"
         end
 
         @excluded_files += paths.select { |path| path.start_with?(".") } if @ignore_dotfiles
@@ -322,7 +384,7 @@ module NeocitiesRed
         Services::FileUploader.new(@client, @subargs[0], @subargs[1]).upload
       elsif File.directory?(@subargs[0])
         folder_uploader = Services::FolderUploader.new(@client, @subargs[0], @subargs[1])
-        files_list = folder_uploader.get_files
+        files_list = folder_uploader.files
         folder_uploader.upload(files_list)
       end
     end
@@ -370,11 +432,11 @@ module NeocitiesRed
 
   #{@pastel.dim 'Examples:'}
 
-  #{@pastel.green '$ neocities list /'}           List files in your root directory
+  #{@pastel.green '$ neocities-red list /'}           List files in your root directory
 
-  #{@pastel.green '$ neocities list -a'}          Recursively display all files and directories
+  #{@pastel.green '$ neocities-red list -a'}          Recursively display all files and directories
 
-  #{@pastel.green '$ neocities list -d /mydir'}   Show detailed information on /mydir
+  #{@pastel.green '$ neocities-red list -d /mydir'}   Show detailed information on /mydir
 
 HERE
       exit
@@ -388,11 +450,11 @@ HERE
 
   #{@pastel.dim 'Examples:'}
 
-  #{@pastel.green '$ neocities delete myfile.jpg'}               Delete myfile.jpg
+  #{@pastel.green '$ neocities-red delete myfile.jpg'}               Delete myfile.jpg
 
-  #{@pastel.green '$ neocities delete myfile.jpg myfile2.jpg'}   Delete myfile.jpg and myfile2.jpg
+  #{@pastel.green '$ neocities-red delete myfile.jpg myfile2.jpg'}   Delete myfile.jpg and myfile2.jpg
 
-  #{@pastel.green '$ neocities delete mydir'}                    Deletes mydir and everything inside it (be careful!)
+  #{@pastel.green '$ neocities-red delete mydir'}                    Deletes mydir and everything inside it (be careful!)
 
 HERE
       exit
@@ -406,9 +468,9 @@ HERE
 
   #{@pastel.dim 'Examples:'}
 
-  #{@pastel.green '$ neocities upload ./img.jpg ./images/img2.jpg'} Upload img.jpg to /images folder and with img2.jpg name
+  #{@pastel.green '$ neocities-red upload ./img.jpg ./images/img2.jpg'} Upload img.jpg to /images folder and with img2.jpg name
 
-  #{@pastel.green '$ neocities upload images/ images/'} Upload images folder with their content to /images folder
+  #{@pastel.green '$ neocities-red upload images/ images/'} Upload images folder with their content to /images folder
 
 HERE
       exit
@@ -432,20 +494,39 @@ HERE
 
   #{@pastel.dim 'Examples:'}
 
-  #{@pastel.green '$ neocities push .'}                                 Recursively upload current directory.
+  #{@pastel.green '$ neocities-red push .'}                                 Recursively upload current directory.
 
-  #{@pastel.green '$ neocities push -e node_modules -e secret.txt .'}   Exclude certain files from push
+  #{@pastel.green '$ neocities-red push -e node_modules -e secret.txt .'}   Exclude certain files from push
 
-  #{@pastel.green '$ neocities push --no-gitignore .'}                  Don't use .gitignore to exclude files
+  #{@pastel.green '$ neocities-red push --no-gitignore .'}                  Don't use .gitignore to exclude files
 
-  #{@pastel.green '$ neocities push --ignore-dotfiles .'}               Ignore files with '.' at the beginning (for example, '.git/')
+  #{@pastel.green '$ neocities-red push --ignore-dotfiles .'}               Ignore files with '.' at the beginning (for example, '.git/')
 
-  #{@pastel.green '$ neocities push --dry-run .'}                       Just show what would be uploaded
+  #{@pastel.green '$ neocities-red push --dry-run .'}                       Just show what would be uploaded
 
-  #{@pastel.green '$ neocities push --optimized .'}                     Do not upload unchanged files.#{' '}
+  #{@pastel.green '$ neocities-red push --optimized .'}                     Do not upload unchanged files.#{' '}
 
-  #{@pastel.green '$ neocities push --prune .'}                         Delete site files not in dir (be careful!)
+  #{@pastel.green '$ neocities-red push --prune .'}                         Delete site files not in dir (be careful!)
 
+HERE
+      exit
+    end
+
+    def display_diff_help_and_exit
+      display_banner
+
+      puts <<HERE
+  #{@pastel.green.bold 'diff'} - Compare local files with remote and show differences.
+
+  #{@pastel.dim 'Examples:'}
+
+  #{@pastel.green '$ neocities-red diff .'}                             Compare your current path with remote
+
+  #{@pastel.green '$ neocities-red diff ./my-website'}                  Compare ./my-website folder with remote
+
+  #{@pastel.green '$ neocities-red diff . --ignore-dotfile'}            Compare your current path with remote without any files starts with '.'
+
+  #{@pastel.green '$ neocities-red diff . -e file.png'}                 Compare your current path with remote without file.png
 HERE
       exit
     end
@@ -458,7 +539,7 @@ HERE
 
   #{@pastel.dim 'Examples:'}
 
-  #{@pastel.green '$ neocities info fauux'}   Gets info for 'fauux' site
+  #{@pastel.green '$ neocities-red info fauux'}   Gets info for 'fauux' site
 
 HERE
       exit
@@ -472,7 +553,7 @@ HERE
 
   #{@pastel.dim 'Examples:'}
 
-  #{@pastel.green '$ neocities logout -y'}
+  #{@pastel.green '$ neocities-red logout -y'}
 
 HERE
       exit
@@ -495,6 +576,7 @@ HERE
     push        Recursively upload a local directory to your site
     upload      Upload individual files to your Neocities site
     delete      Delete files from your Neocities site
+    diff        Compare your local directory with your Neocities siteя
     list        List files from your Neocities site
     info        Information and stats for your site
     logout      Remove the site api key from the config

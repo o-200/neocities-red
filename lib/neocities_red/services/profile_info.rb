@@ -17,7 +17,7 @@ module NeocitiesRed
         @pastel = Pastel.new(eachline: "\n")
       end
 
-      def get_stats
+      def stats
         response = @client.info(@subargs[0] || @sitename)
 
         raise NeocitiesRed::Services::ClientError, response if response[:result] == "error"
@@ -28,7 +28,7 @@ module NeocitiesRed
       def pretty_print
         out = []
 
-        get_stats[:info].each do |k, v|
+        stats[:info].each do |k, v|
           v = Time.parse(v).localtime if v && %i[created_at last_updated].include?(k)
 
           out << [@pastel.bold(k.to_s), v]
