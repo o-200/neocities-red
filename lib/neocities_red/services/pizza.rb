@@ -84,7 +84,7 @@ module NeocitiesRed
       ].freeze
 
       def make_order
-        Pastel.new.bright_red(EXCUSES.sample)
+        Pastel.new(enabled: true).bright_red(EXCUSES.sample)
       end
     end
   end
