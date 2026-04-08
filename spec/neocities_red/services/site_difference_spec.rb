@@ -8,7 +8,7 @@ require "pastel"
 RSpec.describe NeocitiesRed::Services::SiteDifference do
   subject(:service) { described_class.new(client, path, detail) }
 
-  let(:client) { instance_double(Client) }
+  let(:client) { instance_double(NeocitiesRed::Client) }
   let(:path) { "/tmp/site" }
   let(:detail) { false }
 

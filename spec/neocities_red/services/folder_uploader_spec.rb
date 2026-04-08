@@ -3,7 +3,7 @@
 require "fileutils"
 
 RSpec.describe NeocitiesRed::Services::FolderUploader do
-  let(:client) { instance_double(NeocitiesClient) }
+  let(:client) { instance_double(NeocitiesRed::Client) }
   let(:remote_path) { "ext/" }
 
   let(:spec_root) { File.expand_path("..", __dir__) } # => ./spec
@@ -27,7 +27,7 @@ RSpec.describe NeocitiesRed::Services::FolderUploader do
   describe "#files" do
     it "raises FileIsNotExists when the path does not exist" do
       uploader = described_class.new(client, File.join(tmp_root, "nope"), remote_path)
-      expect { uploader.files }.to raise_error(Neocities::Services::FileIsNotExists)
+      expect { uploader.files }.to raise_error(NeocitiesRed::Services::FileIsNotExists)
     end
 
     it "returns all files under the directory as relative paths, including dotfiles, excluding directories" do
