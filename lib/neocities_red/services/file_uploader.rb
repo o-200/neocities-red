@@ -16,7 +16,7 @@ module NeocitiesRed
       end
 
       def upload
-        path = Pathname(@filepath)
+        path = Pathname.new(@filepath)
 
         raise FileIsNotExists, "#{path} does not exist locally." unless path.exist?
 
