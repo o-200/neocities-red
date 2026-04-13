@@ -1,6 +1,12 @@
 # frozen_string_literal: true
 
-require "openssl/win/root" if Gem.win_platform?
+if Gem.win_platform?
+  begin
+    require "openssl/win/root"
+  rescue LoadError
+    # Optional dependency that helps Windows trust store integration.
+  end
+end
 require "json"
 require "pathname"
 require "uri"
