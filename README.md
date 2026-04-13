@@ -1,5 +1,5 @@
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/o-200/neocities-red/ci.yml)
 [![Gem Version](https://img.shields.io/gem/v/neocities-red?style=for-the-badge&logo=rubygems&logoColor=white)](https://rubygems.org/gems/neocities-red)
-[![CI](https://img.shields.io/github/actions/workflow/status/o-200/neocities-red/ci.yml?branch=main&label=CI&logo=githubactions&style=for-the-badge)](https://github.com/o-200/neocities-red/actions/workflows/ci.yml)
 [![Ruby](https://img.shields.io/badge/Ruby-4.0-CC342D?style=for-the-badge&logo=ruby&logoColor=white)](https://www.ruby-lang.org/)
 [![Platform](https://img.shields.io/badge/platform-linux%20%7C%20macos%20%7C%20windows-blue?style=for-the-badge)]()
 [![License](https://img.shields.io/github/license/o-200/neocities-red?style=for-the-badge)](https://github.com/o-200/neocities-red/blob/main/LICENSE)
