@@ -4,3 +4,4 @@ test.rb
 mise.toml
 
 .rspec_status
+.rubocop_cache

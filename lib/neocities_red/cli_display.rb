@@ -46,10 +46,10 @@ module NeocitiesRed
         say modified
       end
 
-      if added.any?
-        say @pastel.bold.green("New files")
-        say added
-      end
+      return unless added.any?
+
+      say @pastel.bold.green("New files")
+      say added
     end
 
     def display_login_prompt
@@ -102,15 +102,15 @@ module NeocitiesRed
       display_banner
 
       say <<~HERE
-          #{@pastel.green.bold 'list'} - List files on your Neocities site
+        #{@pastel.green.bold 'list'} - List files on your Neocities site
 
-          #{@pastel.dim 'Examples:'}
+        #{@pastel.dim 'Examples:'}
 
-          #{@pastel.green '$ neocities-red list /'}           List files in your root directory
+        #{@pastel.green '$ neocities-red list /'}           List files in your root directory
 
-          #{@pastel.green '$ neocities-red list -a'}          Recursively display all files and directories
+        #{@pastel.green '$ neocities-red list -a'}          Recursively display all files and directories
 
-          #{@pastel.green '$ neocities-red list -d /mydir'}   Show detailed information on /mydir
+        #{@pastel.green '$ neocities-red list -d /mydir'}   Show detailed information on /mydir
       HERE
       exit
     end
@@ -119,15 +119,15 @@ module NeocitiesRed
       display_banner
 
       say <<~HERE
-          #{@pastel.green.bold 'delete'} - Delete files on your Neocities site
+        #{@pastel.green.bold 'delete'} - Delete files on your Neocities site
 
-          #{@pastel.dim 'Examples:'}
+        #{@pastel.dim 'Examples:'}
 
-          #{@pastel.green '$ neocities-red delete myfile.jpg'}               Delete myfile.jpg
+        #{@pastel.green '$ neocities-red delete myfile.jpg'}               Delete myfile.jpg
 
-          #{@pastel.green '$ neocities-red delete myfile.jpg myfile2.jpg'}   Delete myfile.jpg and myfile2.jpg
+        #{@pastel.green '$ neocities-red delete myfile.jpg myfile2.jpg'}   Delete myfile.jpg and myfile2.jpg
 
-          #{@pastel.green '$ neocities-red delete mydir'}                    Deletes mydir and everything inside it (be careful!)
+        #{@pastel.green '$ neocities-red delete mydir'}                    Deletes mydir and everything inside it (be careful!)
       HERE
       exit
     end
@@ -136,13 +136,13 @@ module NeocitiesRed
       display_banner
 
       say <<~HERE
-          #{@pastel.green.bold 'upload'} - Upload file to your Neocities site to the specific path
+        #{@pastel.green.bold 'upload'} - Upload file to your Neocities site to the specific path
 
-          #{@pastel.dim 'Examples:'}
+        #{@pastel.dim 'Examples:'}
 
-          #{@pastel.green '$ neocities-red upload ./img.jpg ./images/img2.jpg'} Upload img.jpg to /images folder and with img2.jpg name
+        #{@pastel.green '$ neocities-red upload ./img.jpg ./images/img2.jpg'} Upload img.jpg to /images folder and with img2.jpg name
 
-          #{@pastel.green '$ neocities-red upload images/ images/'} Upload images folder with their content to /images folder
+        #{@pastel.green '$ neocities-red upload images/ images/'} Upload images folder with their content to /images folder
       HERE
       exit
     end
@@ -151,7 +151,7 @@ module NeocitiesRed
       display_banner
 
       say <<~HERE
-          #{@pastel.magenta.bold 'pull'} - Get the most recent version of files from your site, does not download if files haven't changed
+        #{@pastel.magenta.bold 'pull'} - Get the most recent version of files from your site, does not download if files haven't changed
       HERE
       exit
     end
@@ -160,23 +160,23 @@ module NeocitiesRed
       display_banner
 
       say <<~HERE
-          #{@pastel.green.bold 'push'} - Recursively upload a local directory to your Neocities site
+        #{@pastel.green.bold 'push'} - Recursively upload a local directory to your Neocities site
 
-          #{@pastel.dim 'Examples:'}
+        #{@pastel.dim 'Examples:'}
 
-          #{@pastel.green '$ neocities-red push .'}                                 Recursively upload current directory.
+        #{@pastel.green '$ neocities-red push .'}                                 Recursively upload current directory.
 
-          #{@pastel.green '$ neocities-red push -e node_modules -e secret.txt .'}   Exclude certain files from push
+        #{@pastel.green '$ neocities-red push -e node_modules -e secret.txt .'}   Exclude certain files from push
 
-          #{@pastel.green '$ neocities-red push --no-gitignore .'}                  Don't use .gitignore to exclude files
+        #{@pastel.green '$ neocities-red push --no-gitignore .'}                  Don't use .gitignore to exclude files
 
-          #{@pastel.green '$ neocities-red push --ignore-dotfiles .'}               Ignore files with '.' at the beginning (for example, '.git/')
+        #{@pastel.green '$ neocities-red push --ignore-dotfiles .'}               Ignore files with '.' at the beginning (for example, '.git/')
 
-          #{@pastel.green '$ neocities-red push --dry-run .'}                       Just show what would be uploaded
+        #{@pastel.green '$ neocities-red push --dry-run .'}                       Just show what would be uploaded
 
-          #{@pastel.green '$ neocities-red push --optimized .'}                     Do not upload unchanged files.
+        #{@pastel.green '$ neocities-red push --optimized .'}                     Do not upload unchanged files.
 
-          #{@pastel.green '$ neocities-red push --prune .'}                         Delete site files not in dir (be careful!)
+        #{@pastel.green '$ neocities-red push --prune .'}                         Delete site files not in dir (be careful!)
       HERE
       exit
     end
@@ -185,17 +185,17 @@ module NeocitiesRed
       display_banner
 
       say <<~HERE
-          #{@pastel.green.bold 'diff'} - Compare local files with remote and show differences.
+        #{@pastel.green.bold 'diff'} - Compare local files with remote and show differences.
 
-          #{@pastel.dim 'Examples:'}
+        #{@pastel.dim 'Examples:'}
 
-          #{@pastel.green '$ neocities-red diff .'}                             Compare your current path with remote
+        #{@pastel.green '$ neocities-red diff .'}                             Compare your current path with remote
 
-          #{@pastel.green '$ neocities-red diff ./my-website'}                  Compare ./my-website folder with remote
+        #{@pastel.green '$ neocities-red diff ./my-website'}                  Compare ./my-website folder with remote
 
-          #{@pastel.green '$ neocities-red diff . --ignore-dotfiles'}           Compare your current path with remote without files starting with '.'
+        #{@pastel.green '$ neocities-red diff . --ignore-dotfiles'}           Compare your current path with remote without files starting with '.'
 
-          #{@pastel.green '$ neocities-red diff . -e file.png'}                 Compare your current path with remote without file.png
+        #{@pastel.green '$ neocities-red diff . -e file.png'}                 Compare your current path with remote without file.png
       HERE
       exit
     end
@@ -204,11 +204,11 @@ module NeocitiesRed
       display_banner
 
       say <<~HERE
-          #{@pastel.green.bold 'info'} - Get site info
+        #{@pastel.green.bold 'info'} - Get site info
 
-          #{@pastel.dim 'Examples:'}
+        #{@pastel.dim 'Examples:'}
 
-          #{@pastel.green '$ neocities-red info fauux'}   Gets info for 'fauux' site
+        #{@pastel.green '$ neocities-red info fauux'}   Gets info for 'fauux' site
       HERE
       exit
     end
@@ -217,11 +217,11 @@ module NeocitiesRed
       display_banner
 
       say <<~HERE
-          #{@pastel.green.bold 'logout'} - Remove the site api key from the config
+        #{@pastel.green.bold 'logout'} - Remove the site api key from the config
 
-          #{@pastel.dim 'Examples:'}
+        #{@pastel.dim 'Examples:'}
 
-          #{@pastel.green '$ neocities-red logout -y'}
+        #{@pastel.green '$ neocities-red logout -y'}
       HERE
       exit
     end
@@ -229,26 +229,26 @@ module NeocitiesRed
     def display_banner
       say <<~HERE
 
-          |\\---/|
-          | #{PENELOPE_EYES.sample}_#{PENELOPE_EYES.sample} |  #{@pastel.on_red.bold ' Neocities red '}
-           \\_#{PENELOPE_MOUTHS.sample}_/
+        |\\---/|
+        | #{PENELOPE_EYES.sample}_#{PENELOPE_EYES.sample} |  #{@pastel.on_red.bold ' Neocities red '}
+         \\_#{PENELOPE_MOUTHS.sample}_/
       HERE
     end
 
     def display_help_and_exit
       display_banner
       say <<~HERE
-          #{@pastel.dim 'Subcommands:'}
-            push        Recursively upload a local directory to your site
-            upload      Upload individual files to your Neocities site
-            delete      Delete files from your Neocities site
-            diff        Compare your local directory with your Neocities site
-            list        List files from your Neocities site
-            info        Information and stats for your site
-            logout      Remove the site api key from the config
-            version     Unceremoniously display version and self destruct
-            pull        Get the most recent version of files from your site
-            pizza       Order a free pizza
+        #{@pastel.dim 'Subcommands:'}
+          push        Recursively upload a local directory to your site
+          upload      Upload individual files to your Neocities site
+          delete      Delete files from your Neocities site
+          diff        Compare your local directory with your Neocities site
+          list        List files from your Neocities site
+          info        Information and stats for your site
+          logout      Remove the site api key from the config
+          version     Unceremoniously display version and self destruct
+          pull        Get the most recent version of files from your site
+          pizza       Order a free pizza
       HERE
       exit
     end
