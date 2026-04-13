@@ -8,4 +8,5 @@ group :test, :development do
   gem "rspec"
   gem "rubocop", "~> 1.82"
   gem "rubocop-rspec", "~> 3.8"
+  gem "webmock"
 end

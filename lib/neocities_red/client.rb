@@ -48,7 +48,7 @@ module NeocitiesRed
     end
 
     def pull(sitename, last_pull_time = nil, last_pull_loc = nil, quiet: true)
-      site_info = get "info", sitename: sitename
+      site_info = info(sitename)
 
       raise ArgumentError, site_info[:message] if site_info[:result] == "error"
 
@@ -65,7 +65,7 @@ module NeocitiesRed
       curr_dir = Dir.pwd
 
       # get list of files
-      resp = get "list"
+      resp = list
 
       raise ArgumentError, resp[:message] if resp[:result] == "error"
 
@@ -128,7 +128,13 @@ module NeocitiesRed
       rpath = remote_path || path.basename
       res = upload_hash(rpath.to_s, Digest::SHA1.file(path.to_s).hexdigest)
 
-      if res[:files] && res[:files][remote_path.to_s.to_sym] == true
+      file_exists_remotely = if res[:files]
+                               res[:files][rpath.to_s.to_sym] == true || res[:files][rpath.to_s] == true
+                             else
+                               false
+                             end
+
+      if file_exists_remotely
         {
           result: "error",
           error_type: "file_exists",

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "pastel"
+require "time"
 require "tty/table"
 
 module NeocitiesRed
@@ -16,10 +17,7 @@ module NeocitiesRed
       def list
         resp = @client.list(@path)
 
-        if resp[:result] == "error"
-          display_response resp
-          exit
-        end
+        display_error_and_exit(resp) if resp[:result] == "error"
 
         resp[:files]
       end
@@ -27,10 +25,7 @@ module NeocitiesRed
       def show
         resp = @client.list(@path)
 
-        if resp[:result] == "error"
-          display_response resp
-          exit
-        end
+        display_error_and_exit(resp) if resp[:result] == "error"
 
         if @detail
           out = [
@@ -55,6 +50,13 @@ module NeocitiesRed
         end
 
         resp[:files]
+      end
+
+      private
+
+      def display_error_and_exit(resp)
+        puts(resp[:message] || resp[:error_type] || resp.inspect)
+        exit
       end
     end
   end

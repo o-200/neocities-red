@@ -1,6 +1,7 @@
 # spec/neocities_red/services/site_difference_spec.rb
 # frozen_string_literal: true
 
+require "spec_helper"
 require "digest"
 require "pathname"
 require "pastel"

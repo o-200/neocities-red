@@ -5,3 +5,34 @@ mise.toml
 
 .rspec_status
 .rubocop_cache
+
+# Bundle directory
+.bundle/
+vendor/bundle/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Coverage
+coverage/
+*.lcov
+
+# Temporary files
+tmp/
+*.log
