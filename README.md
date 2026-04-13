@@ -1,8 +1,10 @@
-[<img src="https://yesterhost.neocities.org/archive/buttons/button258.png" />](https://neocities.org)
-[<img src="https://img.shields.io/badge/Ruby-CC342D?style=flat&logo=ruby&logoColor=white" />]()
-[![Gem Version](https://badge.fury.io/rb/neocities-red.svg)](https://badge.fury.io/rb/neocities-red)
-[![Made With Love](https://img.shields.io/badge/Made%20With-Love-orange.svg)]()
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Gem Version](https://img.shields.io/gem/v/neocities-red?style=for-the-badge&logo=rubygems&logoColor=white)](https://rubygems.org/gems/neocities-red)
+[![CI](https://img.shields.io/github/actions/workflow/status/o-200/neocities-red/ci.yml?branch=main&label=CI&logo=githubactions&style=for-the-badge)](https://github.com/o-200/neocities-red/actions/workflows/ci.yml)
+[![Ruby](https://img.shields.io/badge/Ruby-4.0-CC342D?style=for-the-badge&logo=ruby&logoColor=white)](https://www.ruby-lang.org/)
+[![Platform](https://img.shields.io/badge/platform-linux%20%7C%20macos%20%7C%20windows-blue?style=for-the-badge)]()
+[![License](https://img.shields.io/github/license/o-200/neocities-red?style=for-the-badge)](https://github.com/o-200/neocities-red/blob/main/LICENSE)
+[![Made with Love](https://img.shields.io/badge/Made%20with-%E2%9D%A4-red?style=for-the-badge)]()
+
 
 # Neocities Red
 
