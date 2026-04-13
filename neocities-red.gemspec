@@ -41,6 +41,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "faraday", "~> 2.3", ">= 2.14.0"
   spec.add_dependency "faraday-follow_redirects"
   spec.add_dependency "faraday-multipart"
+  spec.add_dependency "fiddle"
   spec.add_dependency "pastel", "~> 0.8", "= 0.8.0"
   spec.add_dependency "rake", "~> 13", ">= 13.3.0"
   spec.add_dependency "tty-prompt", "~> 0.23", "= 0.23.1"
