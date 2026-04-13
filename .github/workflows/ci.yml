@@ -23,6 +23,7 @@ jobs:
         run: |
           ruby -v
           bundle exec rubocop -V
+          bundle exec rspec -v
 
       - name: Run linter
         run: bundle exec rubocop
@@ -65,15 +66,56 @@ jobs:
       - name: Run tests
         run: bundle exec rspec
 
+  smoke_unix:
+    name: Start CLI (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby 4.0.0
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 4.0.0
+          bundler-cache: true
+
+      - name: Start CLI
+        run: |
+          chmod +x bin/neocities-red
+          bundle exec bin/neocities-red
+
+  smoke_windows:
+    name: Start CLI (windows-latest)
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby 4.0.0
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 4.0.0
+          bundler-cache: true
+
+      - name: Start CLI
+        shell: pwsh
+        run: bundle exec ruby bin/neocities-red
+
   freebsd:
-    name: Test (freebsd-14.2)
+    name: Test + Start (freebsd-14.2)
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Run lint and tests in FreeBSD VM
+      - name: Run lint, tests, and start CLI in FreeBSD VM
         uses: vmactions/freebsd-vm@v1
         with:
           release: "14.2"
@@ -91,3 +133,5 @@ jobs:
             "$RUBY_BIN" -S bundle _4.0.6_ install
             "$RUBY_BIN" -S bundle _4.0.6_ exec rubocop
             "$RUBY_BIN" -S bundle _4.0.6_ exec rspec
+            chmod +x bin/neocities-red
+            "$RUBY_BIN" -S bundle _4.0.6_ exec bin/neocities-red
