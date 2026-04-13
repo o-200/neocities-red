@@ -13,7 +13,24 @@ Gem::Specification.new do |spec|
   spec.license       = "MIT"
 
   spec.files         = Dir.chdir(File.expand_path(__dir__)) do
-    `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
+    files = begin
+      if system("git", "rev-parse", "--is-inside-work-tree", out: File::NULL, err: File::NULL)
+        `git ls-files -z`.split("\x0")
+      else
+        []
+      end
+    rescue Errno::ENOENT
+      []
+    end
+
+    if files.empty?
+      files = Dir.glob("**/*", File::FNM_DOTMATCH).select do |path|
+        File.file?(path) &&
+          !path.start_with?("test/", "spec/", "features/", ".git/", ".github/", ".rubocop_cache/")
+      end
+    end
+
+    files
   end
 
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }

@@ -1,11 +1,12 @@
 name: CI
 
 on:
-  push:
   pull_request:
+  push:
 
 jobs:
   lint:
+    name: Lint (ubuntu-latest)
     runs-on: ubuntu-latest
 
     steps:
@@ -16,11 +17,7 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: 4.0.0
-
-      - name: Install dependencies
-        run: |
-          bundle config set frozen true
-          bundle install
+          bundler-cache: true
 
       - name: Debug versions
         run: |
@@ -30,7 +27,8 @@ jobs:
       - name: Run linter
         run: bundle exec rubocop
 
-  test:
+  test_linux:
+    name: Test (ubuntu-latest)
     runs-on: ubuntu-latest
 
     steps:
@@ -41,11 +39,55 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: 4.0.0
-
-      - name: Install dependencies
-        run: |
-          bundle config set frozen true
-          bundle install
+          bundler-cache: true
 
       - name: Run tests
         run: bundle exec rspec
+
+  test_non_linux:
+    name: Test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby 4.0.0
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 4.0.0
+          bundler-cache: true
+
+      - name: Run tests
+        run: bundle exec rspec
+
+  freebsd:
+    name: Test (freebsd-14.2)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run lint and tests in FreeBSD VM
+        uses: vmactions/freebsd-vm@v1
+        with:
+          release: "14.2"
+          usesh: true
+          prepare: |
+            pkg install -y ca_root_nss git rubygem-bundler
+            pkg install -y ruby34
+          run: |
+            RUBY_BIN="$(command -v ruby34 || command -v ruby)"
+            "$RUBY_BIN" -v
+            "$RUBY_BIN" -e 'required = Gem::Version.new("3.4.0"); current = Gem::Version.new(RUBY_VERSION); abort("Need Ruby >= #{required}, got #{current}") if current < required'
+            "$RUBY_BIN" -S gem install bundler -v 4.0.6
+            "$RUBY_BIN" -S bundle _4.0.6_ -v
+            "$RUBY_BIN" -S bundle _4.0.6_ config set frozen true
+            "$RUBY_BIN" -S bundle _4.0.6_ install
+            "$RUBY_BIN" -S bundle _4.0.6_ exec rubocop
+            "$RUBY_BIN" -S bundle _4.0.6_ exec rspec

@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require "pathname"
-require "pastel"
 require "tty/table"
 require "tty/prompt"
 require "fileutils"
@@ -9,6 +8,7 @@ require "json"
 require "whirly"
 require "digest"
 require "time"
+require_relative "cli_display"
 
 # warning - the big quantity of working threads could be considered like-a DDOS.
 # Your ip-address could get banned for a few days.
@@ -18,12 +18,10 @@ module NeocitiesRed
   class CLI
     SUBCOMMANDS = %w[upload delete list info push logout pizza pull purge diff].freeze
     HELP_SUBCOMMANDS = ["-h", "--help", "help"].freeze
-    PENELOPE_MOUTHS = %w[^ o ~ - v U].freeze
-    PENELOPE_EYES = %w[o ~ O].freeze
 
     def initialize(argv)
       @argv = argv.dup
-      @pastel = Pastel.new eachline: "\n"
+      @display = NeocitiesRed::CliDisplay.new
       @subcmd = @argv.first
       @subargs = @argv[1..@argv.length]
       @prompt = TTY::Prompt.new
@@ -31,38 +29,18 @@ module NeocitiesRed
       @app_config_path = File.join self.class.app_config_path("neocities"), "config.json"
     end
 
-    def display_response(resp)
-      if resp.is_a?(Exception)
-        out = "#{@pastel.red.bold 'ERROR:'} #{resp.detailed_message}"
-        puts out
-        exit
-      end
-
-      if resp[:result] == "success"
-        puts "#{@pastel.green.bold 'SUCCESS:'} #{resp[:message]}"
-      elsif resp[:result] == "error" && resp[:error_type] == "file_exists"
-        out = "#{@pastel.yellow.bold 'EXISTS:'} #{resp[:message]}"
-        out += " (#{resp[:error_type]})" if resp[:error_type]
-        puts out
-      else
-        out = "#{@pastel.red.bold 'ERROR:'} #{resp[:message]}"
-        out += " (#{resp[:error_type]})" if resp[:error_type]
-        puts out
-      end
-    end
-
     def run
       if @argv[0] == "version"
-        puts Neocities::VERSION
+        @display.say NeocitiesRed::VERSION
         exit
       end
 
       if HELP_SUBCOMMANDS.include?(@subcmd) && SUBCOMMANDS.include?(@subargs[0])
-        send "display_#{@subargs[0]}_help_and_exit"
+        @display.public_send("display_#{@subargs[0]}_help_and_exit")
       elsif @subcmd.nil? || !SUBCOMMANDS.include?(@subcmd)
-        display_help_and_exit
+        @display.display_help_and_exit
       elsif @subargs.join.match(HELP_SUBCOMMANDS.join("|")) && @subcmd != "info"
-        send "display_#{@subcmd}_help_and_exit"
+        @display.public_send("display_#{@subcmd}_help_and_exit")
 
       end
 
@@ -82,7 +60,7 @@ module NeocitiesRed
       end
 
       if @api_key.nil?
-        puts "Please login to get your API key:"
+        @display.display_login_prompt
 
         if !@sitename && !@password
           @sitename = @prompt.ask("sitename:", default: ENV.fetch("NEOCITIES_SITENAME", nil))
@@ -101,9 +79,9 @@ module NeocitiesRed
           FileUtils.mkdir_p Pathname(@app_config_path).dirname
           File.write @app_config_path, conf.to_json
 
-          puts "The api key for #{@pastel.bold @sitename} has been stored in #{@pastel.bold @app_config_path}."
+          @display.display_api_key_saved(@sitename, @app_config_path)
         else
-          display_response resp
+          @display.display_response(resp)
           exit
         end
       else
@@ -114,7 +92,7 @@ module NeocitiesRed
     end
 
     def diff
-      display_diff_help_and_exit if @subargs.empty?
+      @display.display_diff_help_and_exit if @subargs.empty?
 
       @ignore_dotfiles = false
       @path = "."
@@ -164,26 +142,11 @@ module NeocitiesRed
         exclude: @exclude
       ).show
 
-      # rubocop:disable Style/GuardClause
-      if removed.any?
-        puts @pastel.bold.red("Removed files")
-        puts removed
-      end
-
-      if modified.any?
-        puts @pastel.bold.yellow("Modified files")
-        puts modified
-      end
-
-      if added.any?
-        puts @pastel.bold.green("New files")
-        puts added
-      end
-      # rubocop:enable Style/GuardClause
+      @display.display_diff_results(added: added, modified: modified, removed: removed)
     end
 
     def delete
-      display_delete_help_and_exit if @subargs.empty?
+      @display.display_delete_help_and_exit if @subargs.empty?
 
       @subargs.each do |path|
         Services::FileRemover.new(@client, path).remove
@@ -199,7 +162,7 @@ module NeocitiesRed
           @subargs.shift
           confirmed = true
         when /^-/
-          puts @pastel.red.bold("Unknown option: #{@subargs[0].inspect}")
+          @display.display_unknown_option(@subargs[0])
           break
         else
           break
@@ -208,21 +171,21 @@ module NeocitiesRed
 
       if confirmed
         FileUtils.rm @app_config_path
-        puts @pastel.bold("Your api key has been removed.")
+        @display.display_logout_success
       else
-        display_logout_help_and_exit
+        @display.display_logout_help_and_exit
       end
     end
 
     def info
       profile_info = Services::ProfileInfo.new(@client, @subargs, @sitename).pretty_print
-      puts TTY::Table.new(profile_info)
+      @display.say TTY::Table.new(profile_info)
     rescue StandardError => e
-      display_response(e)
+      @display.display_response(e)
     end
 
     def list
-      display_list_help_and_exit if @subargs.empty?
+      @display.display_list_help_and_exit if @subargs.empty?
 
       @detail = true if @subargs.delete("-d") == "-d"
 
@@ -230,11 +193,11 @@ module NeocitiesRed
 
       path = @subargs[0]
 
-      puts Services::FileList.new(@client, path, @detail).show
+      @display.say Services::FileList.new(@client, path, @detail).show
     end
 
     def push
-      display_push_help_and_exit if @subargs.empty?
+      @display.display_push_help_and_exit if @subargs.empty?
       @no_gitignore = false
       @ignore_dotfiles = false
       @excluded_files = []
@@ -270,31 +233,31 @@ module NeocitiesRed
           @subargs.shift
           @optimized = true
         when /^-/
-          puts @pastel.red.bold("Unknown option: #{@subargs[0].inspect}")
-          display_push_help_and_exit
+          @display.display_unknown_option(@subargs[0])
+          @display.display_push_help_and_exit
         else
           break
         end
       end
 
       if @subargs[0].nil?
-        display_response result: "error", message: "no local path provided"
-        display_push_help_and_exit
+        @display.display_response(result: "error", message: "no local path provided")
+        @display.display_push_help_and_exit
       end
 
       root_path = Pathname @subargs[0]
 
       unless root_path.exist?
-        display_response result: "error", message: "path #{root_path} does not exist"
-        display_push_help_and_exit
+        @display.display_response(result: "error", message: "path #{root_path} does not exist")
+        @display.display_push_help_and_exit
       end
 
       unless root_path.directory?
-        display_response result: "error", message: "provided path is not a directory"
-        display_push_help_and_exit
+        @display.display_response(result: "error", message: "provided path is not a directory")
+        @display.display_push_help_and_exit
       end
 
-      puts @pastel.green.bold("Doing a dry run, not actually pushing anything") if @dry_run
+      @display.display_dry_run_notice if @dry_run
 
       if @prune
         pruned_dirs = []
@@ -306,14 +269,13 @@ module NeocitiesRed
 
           next unless !path.exist? && !pruned_dirs.include?(path.dirname)
 
-          print @pastel.bold("Deleting #{file[:path]} ... ")
+          @display.display_delete_progress(file[:path])
           resp = @client.delete_wrapper_with_dry_run file[:path], @dry_run
 
           if resp[:result] == "success"
-            print "#{@pastel.green.bold('SUCCESS')}\n"
+            @display.display_delete_success
           else
-            print "\n"
-            display_response resp
+            @display.display_delete_error(resp)
           end
         end
       end
@@ -331,7 +293,7 @@ module NeocitiesRed
             ignores.none? { |ignore| File.fnmatch?(ignore, path) }
           end
 
-          puts "Not pushing .gitignore entries (--no-gitignore to disable)"
+          @display.display_gitignore_hint
         end
 
         @excluded_files += paths.select { |path| path.start_with?(".") } if @ignore_dotfiles
@@ -373,12 +335,12 @@ module NeocitiesRed
         end
 
         threads.each(&:join)
-        puts "All files uploaded."
+        @display.display_upload_complete
       end
     end
 
     def upload
-      display_upload_help_and_exit if @subargs[0].nil? || @subargs[1].nil?
+      @display.display_upload_help_and_exit if @subargs[0].nil? || @subargs[1].nil?
 
       if File.file?(@subargs[0])
         Services::FileUploader.new(@client, @subargs[0], @subargs[1]).upload
@@ -404,188 +366,19 @@ module NeocitiesRed
     def purge
       resp = @client.list
       resp[:files].each do |file|
-        print @pastel.bold("Deleting #{file[:path]} ... ")
+        @display.display_delete_progress(file[:path])
         resp = @client.delete_wrapper_with_dry_run file[:path], @dry_run
 
         if resp[:result] == "success"
-          print "#{@pastel.green.bold('SUCCESS')}\n"
+          @display.display_delete_success
         else
-          print "\n"
-          display_response resp
+          @display.display_delete_error(resp)
         end
       end
     end
 
     def pizza
-      display_pizza_help_and_exit
-    end
-
-    def display_pizza_help_and_exit
-      puts Services::Pizza.new.make_order
-    end
-
-    def display_list_help_and_exit
-      display_banner
-
-      puts <<HERE
-  #{@pastel.green.bold 'list'} - List files on your Neocities site
-
-  #{@pastel.dim 'Examples:'}
-
-  #{@pastel.green '$ neocities-red list /'}           List files in your root directory
-
-  #{@pastel.green '$ neocities-red list -a'}          Recursively display all files and directories
-
-  #{@pastel.green '$ neocities-red list -d /mydir'}   Show detailed information on /mydir
-
-HERE
-      exit
-    end
-
-    def display_delete_help_and_exit
-      display_banner
-
-      puts <<HERE
-  #{@pastel.green.bold 'delete'} - Delete files on your Neocities site
-
-  #{@pastel.dim 'Examples:'}
-
-  #{@pastel.green '$ neocities-red delete myfile.jpg'}               Delete myfile.jpg
-
-  #{@pastel.green '$ neocities-red delete myfile.jpg myfile2.jpg'}   Delete myfile.jpg and myfile2.jpg
-
-  #{@pastel.green '$ neocities-red delete mydir'}                    Deletes mydir and everything inside it (be careful!)
-
-HERE
-      exit
-    end
-
-    def display_upload_help_and_exit
-      display_banner
-
-      puts <<HERE
-  #{@pastel.green.bold 'upload'} - Upload file to your Neocities site to the specific path
-
-  #{@pastel.dim 'Examples:'}
-
-  #{@pastel.green '$ neocities-red upload ./img.jpg ./images/img2.jpg'} Upload img.jpg to /images folder and with img2.jpg name
-
-  #{@pastel.green '$ neocities-red upload images/ images/'} Upload images folder with their content to /images folder
-
-HERE
-      exit
-    end
-
-    def display_pull_help_and_exit
-      display_banner
-
-      puts <<HERE
-  #{@pastel.magenta.bold 'pull'} - Get the most recent version of files from your site, does not download if files haven't changed
-
-HERE
-      exit
-    end
-
-    def display_push_help_and_exit
-      display_banner
-
-      puts <<HERE
-  #{@pastel.green.bold 'push'} - Recursively upload a local directory to your Neocities site
-
-  #{@pastel.dim 'Examples:'}
-
-  #{@pastel.green '$ neocities-red push .'}                                 Recursively upload current directory.
-
-  #{@pastel.green '$ neocities-red push -e node_modules -e secret.txt .'}   Exclude certain files from push
-
-  #{@pastel.green '$ neocities-red push --no-gitignore .'}                  Don't use .gitignore to exclude files
-
-  #{@pastel.green '$ neocities-red push --ignore-dotfiles .'}               Ignore files with '.' at the beginning (for example, '.git/')
-
-  #{@pastel.green '$ neocities-red push --dry-run .'}                       Just show what would be uploaded
-
-  #{@pastel.green '$ neocities-red push --optimized .'}                     Do not upload unchanged files.#{' '}
-
-  #{@pastel.green '$ neocities-red push --prune .'}                         Delete site files not in dir (be careful!)
-
-HERE
-      exit
-    end
-
-    def display_diff_help_and_exit
-      display_banner
-
-      puts <<HERE
-  #{@pastel.green.bold 'diff'} - Compare local files with remote and show differences.
-
-  #{@pastel.dim 'Examples:'}
-
-  #{@pastel.green '$ neocities-red diff .'}                             Compare your current path with remote
-
-  #{@pastel.green '$ neocities-red diff ./my-website'}                  Compare ./my-website folder with remote
-
-  #{@pastel.green '$ neocities-red diff . --ignore-dotfile'}            Compare your current path with remote without any files starts with '.'
-
-  #{@pastel.green '$ neocities-red diff . -e file.png'}                 Compare your current path with remote without file.png
-HERE
-      exit
-    end
-
-    def display_info_help_and_exit
-      display_banner
-
-      puts <<HERE
-  #{@pastel.green.bold 'info'} - Get site info
-
-  #{@pastel.dim 'Examples:'}
-
-  #{@pastel.green '$ neocities-red info fauux'}   Gets info for 'fauux' site
-
-HERE
-      exit
-    end
-
-    def display_logout_help_and_exit
-      display_banner
-
-      puts <<HERE
-  #{@pastel.green.bold 'logout'} - Remove the site api key from the config
-
-  #{@pastel.dim 'Examples:'}
-
-  #{@pastel.green '$ neocities-red logout -y'}
-
-HERE
-      exit
-    end
-
-    def display_banner
-      puts <<HERE
-
-  |\\---/|
-  | #{PENELOPE_EYES.sample}_#{PENELOPE_EYES.sample} |  #{@pastel.on_red.bold ' Neocities red '}
-   \\_#{PENELOPE_MOUTHS.sample}_/
-
-HERE
-    end
-
-    def display_help_and_exit
-      display_banner
-      puts <<HERE
-  #{@pastel.dim 'Subcommands:'}
-    push        Recursively upload a local directory to your site
-    upload      Upload individual files to your Neocities site
-    delete      Delete files from your Neocities site
-    diff        Compare your local directory with your Neocities siteя
-    list        List files from your Neocities site
-    info        Information and stats for your site
-    logout      Remove the site api key from the config
-    version     Unceremoniously display version and self destruct
-    pull        Get the most recent version of files from your site
-    pizza       Order a free pizza
-
-HERE
-      exit
+      @display.display_pizza_help_and_exit
     end
 
     def self.app_config_path(name)

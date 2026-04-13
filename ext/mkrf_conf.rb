@@ -15,6 +15,5 @@ rescue StandardError
   exit(1)
 end
 
-f = File.open(File.join(File.dirname(__FILE__), "Rakefile"), "w") # create dummy rakefile to indicate success
-f.write("task :default\n")
-f.close
+# create dummy rakefile to indicate success
+File.write(File.join(File.dirname(__FILE__), "Rakefile"), "task :default\n")

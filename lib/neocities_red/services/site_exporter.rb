@@ -13,6 +13,7 @@ module NeocitiesRed
         @sitename = sitename
         @data = data
         @app_config_path = app_config_path
+        @pastel = Pastel.new(eachline: "\n")
       end
 
       def export(quiet, last_pull_time, last_pull_loc)
@@ -21,7 +22,7 @@ module NeocitiesRed
                        status: "Retrieving files for #{@pastel.bold @sitename}"
         end
 
-        @client.pull(@sitename, last_pull_time, last_pull_loc, quiet)
+        @client.pull(@sitename, last_pull_time, last_pull_loc, quiet: quiet)
 
         # write last pull data to file (not necessarily the best way to do this, but better than cloning every time)
         data["LAST_PULL"] = {
@@ -31,11 +32,9 @@ module NeocitiesRed
 
         File.write(app_config_path, data.to_json)
       rescue StandardError => e
-        Whirly.stop if quiet
-
         e
       ensure
-        exit
+        Whirly.stop if quiet
       end
     end
   end

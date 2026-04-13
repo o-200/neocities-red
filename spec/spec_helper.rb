@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require "neocities_red"
+require "fileutils"
+require "webmock"
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure

@@ -29,17 +29,16 @@ module NeocitiesRed
           paths = Dir.glob(File.join("**", "*"), File::FNM_DOTMATCH)
 
           local_paths = paths.reject { |path| path.start_with?(".") }
-          local_files = local_paths.select { |path| File.file?(path) }
-                                   .map do |path|
-                                     {
-                                       path: path,
-                                       sha1_hash: Digest::SHA1.file(path).hexdigest
-                                     }
+          local_files = local_paths.select { |path| File.file?(path) }.map do |path|
+            {
+              path: path,
+              sha1_hash: Digest::SHA1.file(path).hexdigest
+            }
           end
           server_paths = server_files.map { |n| n[:path] }
 
-          server_file_map = server_files.each_with_object({}) do |file, hash|
-            hash[file[:path]] = file[:sha1_hash]
+          server_file_map = server_files.to_h do |file|
+            [file[:path], file[:sha1_hash]]
           end
 
           if @ignore_dotfiles
