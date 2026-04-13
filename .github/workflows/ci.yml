@@ -79,11 +79,15 @@ jobs:
           release: "14.2"
           usesh: true
           prepare: |
-            pkg install -y ruby rubygem-bundler ca_root_nss git
+            pkg install -y ca_root_nss git rubygem-bundler
+            pkg install -y ruby34
           run: |
-            ruby -v
-            bundle -v
-            bundle config set frozen true
-            bundle install
-            bundle exec rubocop
-            bundle exec rspec
+            RUBY_BIN="$(command -v ruby34 || command -v ruby)"
+            "$RUBY_BIN" -v
+            "$RUBY_BIN" -e 'required = Gem::Version.new("3.4.0"); current = Gem::Version.new(RUBY_VERSION); abort("Need Ruby >= #{required}, got #{current}") if current < required'
+            "$RUBY_BIN" -S gem install bundler -v 4.0.6
+            "$RUBY_BIN" -S bundle _4.0.6_ -v
+            "$RUBY_BIN" -S bundle _4.0.6_ config set frozen true
+            "$RUBY_BIN" -S bundle _4.0.6_ install
+            "$RUBY_BIN" -S bundle _4.0.6_ exec rubocop
+            "$RUBY_BIN" -S bundle _4.0.6_ exec rspec
