@@ -2,6 +2,7 @@
 
 require File.join(File.dirname(__FILE__), "neocities_red", "version")
 require File.join(File.dirname(__FILE__), "neocities_red", "client")
+require File.join(File.dirname(__FILE__), "neocities_red", "cli_display")
 require File.join(File.dirname(__FILE__), "neocities_red", "cli")
 
 require File.join(File.dirname(__FILE__), "neocities_red", "services", "file_uploader")
