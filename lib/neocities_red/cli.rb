@@ -385,17 +385,17 @@ module NeocitiesRed
 
     def self.app_config_path(name)
       platform = case RUBY_PLATFORM
-      when /cygwin|mswin|mingw|bccwin|wince|emx|win32/
-        :windows
-      when /darwin/
-        :darwin
-      when /linux/
-        :linux
-      when /freebsd/
-        :freebsd
-      else
-        :unknown
-      end
+                 when /cygwin|mswin|mingw|bccwin|wince|emx|win32/
+                   :windows
+                 when /darwin/
+                   :darwin
+                 when /linux/
+                   :linux
+                 when /freebsd/
+                   :freebsd
+                 else
+                   :unknown
+                 end
 
       case platform
       when :linux, :freebsd
