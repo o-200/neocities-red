@@ -16,6 +16,7 @@ require "date"
 require "whirly"
 
 require "faraday"
+require "faraday/retry"
 require "faraday/multipart"
 require "faraday/follow_redirects"
 
@@ -28,8 +29,23 @@ module NeocitiesRed
       @opts = opts
       @pastel = Pastel.new eachline: "\n"
       @conn = Faraday.new(@uri) do |conn|
+        conn.options.timeout = 10
+        conn.options.open_timeout = 5
+        conn.adapter :net_http
+
         conn.request :multipart
         conn.request :url_encoded
+
+        conn.request :retry,
+                     max: 3,
+                     interval: 0.3,
+                     backoff_factor: 2,
+                     retry_statuses: [429, 500, 502, 503, 504],
+                     exceptions: [
+                       Faraday::TimeoutError,
+                       Faraday::ConnectionFailed,
+                       Faraday::SSLError
+                     ]
 
         conn.response :follow_redirects
       end
@@ -47,17 +63,20 @@ module NeocitiesRed
       get "list", path: path
     end
 
+    # TODO: refactor
     def pull(sitename, last_pull_time = nil, last_pull_loc = nil, quiet: true)
       site_info = info(sitename)
 
       raise ArgumentError, site_info[:message] if site_info[:result] == "error"
 
-      # handle custom domains for supporter accounts
-      domain = if site_info[:info][:domain] && site_info[:info][:domain] != ""
-                 "https://#{site_info[:info][:domain]}/"
-               else
-                 "https://#{sitename}.neocities.org/"
-               end
+      info_data = site_info[:info]
+
+      domain =
+        if info_data[:domain].to_s.empty?
+          "https://#{sitename}.neocities.org/"
+        else
+          "https://#{info_data[:domain]}/"
+        end
 
       # start stats
       success_loaded = 0
