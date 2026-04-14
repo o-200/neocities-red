@@ -16,7 +16,7 @@ module NeocitiesRed
         @pastel = Pastel.new(eachline: "\n")
       end
 
-      def export(quiet, last_pull_time, last_pull_loc)
+      def export(quiet: false, last_pull_time: nil, last_pull_loc: nil)
         if quiet
           Whirly.start spinner: ["😺", "😸", "😹", "😻", "😼", "😽", "🙀", "😿", "😾"],
                        status: "Retrieving files for #{@pastel.bold @sitename}"

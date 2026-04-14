@@ -6,12 +6,14 @@ require "rubygems/dependency_installer"
 begin
   Gem::Command.build_args = ARGV
 rescue NoMethodError => e
-  warn "Gem::Command.build_args= not available: #{e.message}"
+  # build_args may not exist in older RubyGems versions
+  warn "Warning: #{e.message}"
 end
 inst = Gem::DependencyInstaller.new
 begin
   inst.install "openssl-win-root", "~> 1.1" if Gem.win_platform?
-rescue StandardError
+rescue StandardError => e
+  warn "Failed to install openssl-win-root: #{e.message}"
   exit(1)
 end
 
