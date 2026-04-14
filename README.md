@@ -1,121 +1,178 @@
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/o-200/neocities-red/ci.yml)
+![CI](https://img.shields.io/github/actions/workflow/status/o-200/neocities-red/ci.yml)
 [![Gem Version](https://img.shields.io/gem/v/neocities-red?style=for-the-badge&logo=rubygems&logoColor=white)](https://rubygems.org/gems/neocities-red)
-[![Ruby](https://img.shields.io/badge/Ruby-4.0-CC342D?style=for-the-badge&logo=ruby&logoColor=white)](https://www.ruby-lang.org/)
+[![Ruby](https://img.shields.io/badge/Ruby-3.4%2B%20%7C%204.0-CC342D?style=for-the-badge&logo=ruby&logoColor=white)](https://www.ruby-lang.org/)
 [![Platform](https://img.shields.io/badge/platform-linux%20%7C%20macos%20%7C%20windows-blue?style=for-the-badge)]()
 [![License](https://img.shields.io/github/license/o-200/neocities-red?style=for-the-badge)](https://github.com/o-200/neocities-red/blob/main/LICENSE)
 [![Made with Love](https://img.shields.io/badge/Made%20with-%E2%9D%A4-red?style=for-the-badge)]()
 
+# 🟥 Neocities Red
 
-# Neocities Red
+> A modern Neocities CLI
 
-Hello, there is a fork of [neocities-ruby gem](https://github.com/neocities/neocities-ruby) with my own features and implementations. A much of my changes doesn't make sense to be pushed into original repository, so i pushed it here.
+A **refactored and extended fork** of the official https://github.com/neocities/neocities-ruby
 
-# The Neocities Gem
+Built for performance, reliability, and real-world workflows (especially static site generators).
 
-A CLI and library for using the Neocities API. Makes it easy to quickly upload, push, delete, and list your Neocities site.
+---
 
-#### Currently, neocities-red tests and develop with ruby 3.4.* and supports 4.*
+## ✨ Key Features
+
+- **Parallel uploads** (3–5 concurrent workers)
+- **Smart diffing** (only upload what changed)
+- **Automatic retries** (handles flaky Neocities API / SSL issues)
+- **Recursive uploads** out of the box
+- **SSG-friendly** (Jekyll, Hugo, Eleventy, etc.)
+- **Clean, extensible architecture**
+
+---
 
 ## Installation
 
-1) Install Ruby Programming Language to your system. 
-- If you're not a programmer - just install version directly from https://www.ruby-lang.org/en/.
-- If you're programmer - just use any of tools to install Ruby. I am prefer to use `asdf` of `mise`.
+### Requirements
 
-2) Install gem just typing:
+- **Ruby 3.4+** (tested, supports 4.x)
+
+Not a programmer?
+
+- Install Ruby here - https://www.ruby-lang.org/en/
+- For Windows you should have installed MSYS2 and MINGW
+
+Using version managers:
+
+- `mise`
+- `asdf`
+
+---
+
+### Install
 
 ```bash
 gem install neocities-red
 ```
 
-### Running
+---
 
-After that, you are all set! Run `neocities-red` in a command line to see the options and get started.
+## Quick Start
 
-## List of improvements/changes:
+```bash
+neocities-red
+```
 
-### 0) Refactor all entire project, change dependencies for more flexibility.
+---
 
-Currently, implementing new features in `neocities-red` is easier than at original cli. Also i approaching the philosophy to use modern dependencies to ensure that `neocities-red` will supports newest versions of Ruby.
+## What's New
 
-### 1) upload
+### 0. Full Refactor
 
-- Uploading is multi-threaded (Instead of uploading by 1 file linnear it uploads 3-5 files at once.)
-- The logic is differs of original gem. 
-- Command also uploads folders recursively (It also upload the content that is inside of the target directory).
+- Modernized dependencies
+- Improved Ruby compatibility (3.4 → 4.x)
+- Cleaner architecture for future features
 
-### 2) push
+---
 
-Now, that command is great for users, which uses static site generators (like Jekyll, Hugo, e.t.c.).
+### 1. `upload` — Parallel & Recursive
 
-- Uploading is multi-threaded (Instead of uploading by 1 file linnear it uploads 3-5 files at once.)
-- `neocities push --optimized .` command is uploads only files which differs or missing.
-- `neocities push --ignore-dotfiles .` is ignores all files/directories with '.' at the beginning.
-- `neocities push -e <folder> .` is ignores folders recursively (Ignoring the content that is inside of the target directory).
+- Multi-threaded (3–5 concurrent uploads)
+- Fully recursive
+- Rewritten upload pipeline
 
-### 3) diff
+---
 
-You can compare your local version of website with remote version.
+### 2. `push`
 
-## TODO'S:
+Designed for static site workflows.
 
-1) Refactor `cli.rb` or use `rails/thor` gem instead.
-2) Add tests.
-3) Make sure that gem is compatible with Linux, Freebsd and Windows
+| Flag                | Description                       |
+| ------------------- | --------------------------------- |
+| `--optimized`       | Upload only changed/missing files |
+| `--ignore-dotfiles` | Skip `.git`, `.env`, etc.         |
+| `-e <folder>`       | Ignore folder recursively         |
 
+#### Examples
 
-## Gem modules
+```bash
+neocities push --optimized --ignore-dotfiles .
+neocities push -e node_modules -e .git .
+```
 
-This gem also transpose all processes to several class in lib/neocities, which could be used to write code that interfaces with the Neocities API.
+---
+
+### 3. `diff` — Local vs Remote
+
+Preview changes before uploading:
+
+```bash
+neocities diff .
+```
+
+---
+
+### 4. Built-in Retries
+
+Handles:
+
+- SSL errors
+- timeouts
+- unstable Neocities API
+
+No more broken deploys due to transient failures.
+
+---
+
+## Library Usage
+
+### Basic Client
 
 ```ruby
 require 'neocities-red'
 
-# use api key
-params = {
-  api_key: 'MyKeyFromNeocities'
-}
+client = Neocities::Client.new(api_key: 'YOUR_API_KEY')
 
-# or sitename and password
-# params = {
-#  sitename: 'petrapixel,
-#  password: 'mypass'
-# }
-
-client = Neocities::Client.new(params)
-client.key
-client.upload(path, remote_path)
+client.upload(local_path, remote_path)
+client.delete(remote_path)
+client.list(remote_path)
 client.info(sitename)
-client.delete(path)
-client.push(path)
-client.list(path)
+client.push(local_path)
 ```
 
-Also, you can use specific service for your needs:
+---
+
+### Advanced: Services
 
 ```ruby
-client = Neocities::Client.new(sitename: 'o200' , password: 'my-super-duper-password') 
-detail = true
-path = '.'
+client = Neocities::Client.new(
+  sitename: 'o200',
+  password: 'secret'
+)
 
-Neocities::Services::FileList.new(client, path, detail).show
+service = Neocities::Services::FileList.new(
+  client,
+  path: '.',
+  detail: true
+)
 
-# [
-#   {
-#     path: "assets", 
-#     is_directory: true, 
-#     created_at: "Sat, 07 Feb 2026 12:26:51 -0000", 
-#     updated_at: "Sat, 07 Feb 2026 12:26:51 -0000"
-#   },
-#   ...
-# ]
-
+files = service.show
 ```
 
-# Contributions ..?
+---
 
-I'm glad to see everyone, so for contribution you need to check issues and take one typing something like "i'd like to take this issue". After that you should to make fork of this repository, create new branch, complete the task and share with solution via pull request. 
+## Contributing
 
-If there are no tasks, just ping me (o-200) for the new issue, and we will think together about what can be implemented or fixed.
+1. Check existing issues
+2. Comment: "I'll take this"
+3. Fork the repo
+4. Create a feature branch
+5. Implement + test
+6. Open a PR
 
-Also, before contribution, please read [CONTRIBUTING.md](CONTRIBUTING.md)
+---
+
+## License
+
+MIT — see LICENSE
+
+---
+
+## Acknowledgements
+
+Built for the Neocities community.
