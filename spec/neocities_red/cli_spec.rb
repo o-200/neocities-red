@@ -53,7 +53,7 @@ RSpec.describe NeocitiesRed::CLI do
 
       path = described_class.app_config_path(app_name)
       expect(path).to eq(
-        File.join("C:/Users/alice", "Local Settings", "Application Data", app_name)
+        File.join("C:/Users/alice", "AppData", "Local", app_name)
       )
     end
 

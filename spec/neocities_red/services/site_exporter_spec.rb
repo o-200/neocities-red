@@ -31,7 +31,7 @@ RSpec.describe NeocitiesRed::Services::SiteExporter do
       end
 
       it "pulls files from the site and updates the config file" do
-        expect { exporter.export(true, nil, nil) }.not_to raise_error
+        expect { exporter.export(quiet: true, last_pull_time: nil, last_pull_loc: nil) }.not_to raise_error
 
         expect(File.exist?(config_path)).to be(true)
         updated_data = JSON.parse(File.read(config_path))
@@ -43,7 +43,7 @@ RSpec.describe NeocitiesRed::Services::SiteExporter do
         allow(Whirly).to receive(:start)
         allow(Whirly).to receive(:stop)
 
-        expect { exporter.export(true, nil, nil) }.not_to raise_error
+        expect { exporter.export(quiet: true, last_pull_time: nil, last_pull_loc: nil) }.not_to raise_error
 
         expect(Whirly).to have_received(:start).with(
           spinner: ["😺", "😸", "😹", "😻", "😼", "😽", "🙀", "😿", "😾"],
@@ -56,7 +56,7 @@ RSpec.describe NeocitiesRed::Services::SiteExporter do
         allow(Whirly).to receive(:start)
         allow(Whirly).to receive(:stop)
 
-        expect { exporter.export(false, nil, nil) }.not_to raise_error
+        expect { exporter.export(quiet: false, last_pull_time: nil, last_pull_loc: nil) }.not_to raise_error
 
         expect(Whirly).not_to have_received(:start)
         expect(Whirly).not_to have_received(:stop)
@@ -67,7 +67,7 @@ RSpec.describe NeocitiesRed::Services::SiteExporter do
         let(:last_pull_loc) { tmp_root }
 
         it "passes last_pull parameters to client.pull" do
-          expect { exporter.export(true, last_pull_time, last_pull_loc) }.not_to raise_error
+          expect { exporter.export(quiet: true, last_pull_time: last_pull_time, last_pull_loc: last_pull_loc) }.not_to raise_error
 
           expect(client).to have_received(:pull).with(
             sitename, last_pull_time, last_pull_loc, quiet: true
@@ -84,7 +84,7 @@ RSpec.describe NeocitiesRed::Services::SiteExporter do
         allow(Whirly).to receive(:stop)
         allow(client).to receive(:pull).and_raise(StandardError.new("network error"))
 
-        result = exporter.export(true, nil, nil)
+        result = exporter.export(quiet: true, last_pull_time: nil, last_pull_loc: nil)
 
         expect(result).to be_a(StandardError)
         expect(result.message).to eq("network error")
@@ -97,7 +97,7 @@ RSpec.describe NeocitiesRed::Services::SiteExporter do
         allow(client).to receive(:pull).and_raise(StandardError.new("network error"))
 
         result = nil
-        expect { result = exporter.export(true, nil, nil) }.not_to raise_error
+        expect { result = exporter.export(quiet: true, last_pull_time: nil, last_pull_loc: nil) }.not_to raise_error
         expect(result).to be_a(StandardError)
       end
     end
