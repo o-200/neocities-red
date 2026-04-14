@@ -353,13 +353,15 @@ module NeocitiesRed
 
     def pull
       quiet = ["--quiet", "-q"].include?(@subargs[0])
+
       file = File.read(@app_config_path)
       data = JSON.parse(file)
-      last_pull_time = data["LAST_PULL"]["time"]
-      last_pull_loc = data["LAST_PULL"]["loc"]
+
+      last_pull_time = data.dig("LAST_PULL", "time")
+      last_pull_loc = data.dig("LAST_PULL", "loc")
 
       Services::SiteExporter.new(@client, @sitename, data, @app_config_path)
-                            .export(quiet, last_pull_time, last_pull_loc)
+                            .export(quiet:, last_pull_time:, last_pull_loc:)
     end
 
     # only for development purposes
@@ -383,35 +385,44 @@ module NeocitiesRed
 
     def self.app_config_path(name)
       platform = case RUBY_PLATFORM
-                 when /win32/
-                   :win32
-                 when /darwin/
-                   :darwin
-                 when /linux/
-                   :linux
-                 else
-                   :unknown
-                 end
+      when /cygwin|mswin|mingw|bccwin|wince|emx|win32/
+        :windows
+      when /darwin/
+        :darwin
+      when /linux/
+        :linux
+      when /freebsd/
+        :freebsd
+      else
+        :unknown
+      end
 
       case platform
-      when :linux
+      when :linux, :freebsd
         return File.join(ENV["XDG_CONFIG_HOME"], name) if ENV["XDG_CONFIG_HOME"]
+        return File.join(Dir.home, ".config", name) if Dir.home
 
-        File.join(Dir.home, ".config", name) if Dir.home
       when :darwin
-        File.join(Dir.home, "Library", "Application Support", name)
-      else
-        # Windows platform detection is weird, just look for the env variables
+        return File.join(Dir.home, "Library", "Application Support", name) if Dir.home
+
+      when :windows
         return File.join(ENV["LOCALAPPDATA"], name) if ENV["LOCALAPPDATA"]
 
         if ENV["USERPROFILE"]
-          return File.join(ENV["USERPROFILE"], "Local Settings", "Application Data",
-                           name)
+          return File.join(
+            ENV["USERPROFILE"],
+            "AppData",
+            "Local",
+            name
+          )
         end
 
-        # Should work for the BSDs
-        File.join(Dir.home, ".#{name}") if Dir.home
+      else
+        # unknown UNIX-like systems
+        return File.join(Dir.home, ".#{name}") if Dir.home
       end
+
+      nil
     end
   end
 end
