@@ -398,13 +398,11 @@ module NeocitiesRed
                  end
 
       case platform
-      when :linux, :freebsd
+      when :linux
         return File.join(ENV["XDG_CONFIG_HOME"], name) if ENV["XDG_CONFIG_HOME"]
         return File.join(Dir.home, ".config", name) if Dir.home
-
       when :darwin
         return File.join(Dir.home, "Library", "Application Support", name) if Dir.home
-
       when :windows
         return File.join(ENV["LOCALAPPDATA"], name) if ENV["LOCALAPPDATA"]
 
@@ -416,9 +414,8 @@ module NeocitiesRed
             name
           )
         end
-
       else
-        # unknown UNIX-like systems
+        # FreeBSD and other unknown UNIX-like systems use dotfile directly in home directory
         return File.join(Dir.home, ".#{name}") if Dir.home
       end
 
