@@ -369,7 +369,7 @@ module NeocitiesRed
       resp = @client.list
       resp[:files].each do |file|
         @display.display_delete_progress(file[:path])
-        resp = @client.delete_wrapper_with_dry_run file[:path], @dry_run
+        resp = @client.delete_wrapper_with_dry_run(file[:path], dry_run: @dry_run)
 
         if resp[:result] == "success"
           @display.display_delete_success
