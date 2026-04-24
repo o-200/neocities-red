@@ -87,9 +87,14 @@ module NeocitiesRed
                      .map { |file| { filepath: file, sha1_hash: Digest::SHA1.file(file).hexdigest } }
 
           res = @client.list
-          server_hex = res[:files].map { |item| item[:sha1_hash] }.compact
+          server_hash_by_path = res[:files].each_with_object({}) do |item, hash_by_path|
+            next unless item[:path] && item[:sha1_hash]
 
-          hex.select { |entry| server_hex.include?(entry[:sha1_hash]) }.map { |entry| entry[:filepath] }
+            hash_by_path[item[:path]] = item[:sha1_hash]
+          end
+
+          hex.select { |entry| server_hash_by_path[entry[:filepath]] == entry[:sha1_hash] }
+             .map { |entry| entry[:filepath] }
         end
 
         def upload_files(paths)

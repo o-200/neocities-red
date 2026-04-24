@@ -87,7 +87,7 @@ RSpec.describe NeocitiesRed::Services::Site::Pusher do
       let(:optimized) { true }
       let(:no_gitignore) { true }
 
-      it "skips files with hashes that already exist remotely" do
+      it "skips files only when the same path already has the same hash remotely" do
         File.write(File.join(tmp_root, "unchanged.txt"), "same content")
         File.write(File.join(tmp_root, "changed.txt"), "new content")
         unchanged_sha = Digest::SHA1.file(File.join(tmp_root, "unchanged.txt")).hexdigest
@@ -102,6 +102,22 @@ RSpec.describe NeocitiesRed::Services::Site::Pusher do
 
         expect(upload_calls).to include(["changed.txt", "changed.txt"])
         expect(upload_calls).not_to include(["unchanged.txt", "unchanged.txt"])
+      end
+
+      it "does not skip a local file when identical hash exists in a different remote directory" do
+        FileUtils.mkdir_p(File.join(tmp_root, "assets"))
+        File.write(File.join(tmp_root, "assets", "logo.txt"), "same content across dirs")
+        local_sha = Digest::SHA1.file(File.join(tmp_root, "assets", "logo.txt")).hexdigest
+
+        allow(client).to receive(:list).and_return(
+          files: [
+            { path: "images/logo.txt", sha1_hash: local_sha }
+          ]
+        )
+
+        service.push
+
+        expect(upload_calls).to include(["assets/logo.txt", "assets/logo.txt"])
       end
     end
 
