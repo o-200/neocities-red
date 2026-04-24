@@ -17,12 +17,13 @@ Built for performance, reliability, and real-world workflows (especially static 
 
 ## ✨ Key Features
 
-- **Parallel uploads** (3–5 concurrent workers)
+- **CLI** with explicit command help (`neocities-red help <command>`)
+- **Parallel uploads** (up to 5 concurrent workers)
 - **Smart diffing** (only upload what changed)
 - **Automatic retries** (handles flaky Neocities API / SSL issues)
 - **Recursive uploads** out of the box
 - **SSG-friendly** (Jekyll, Hugo, Eleventy, etc.)
-- **Clean, extensible architecture**
+- **Namespaced services** grouped by domain (`file/`, `site/`, `common/`)
 
 ---
 
@@ -55,67 +56,46 @@ gem install neocities-red
 ## Quick Start
 
 ```bash
-neocities-red
+neocities-red help
+neocities-red help push
 ```
 
 ---
 
-## What's New
+## CLI Commands
 
-### 0. Full Refactor
+```text
+push      Recursively upload a local directory to your site
+upload    Upload individual files/folders to your site
+delete    Delete remote files
+diff      Compare local directory with remote
+list      List remote files
+info      Show site info
+pull      Download latest remote files
+logout    Remove stored API key from config
+version   Print gem version
+pizza     Easter egg
+```
 
-- Modernized dependencies
-- Improved Ruby compatibility (3.4 → 4.x)
-- Cleaner architecture for future features
+### `push` options
 
----
+| Flag | Description |
+| --- | --- |
+| `--no-gitignore` | Ignore `.gitignore` filtering and upload matching files |
+| `--ignore-dotfiles` | Skip dotfiles/dot-directories |
+| `-e`, `--exclude` | Exclude file/directory paths |
+| `--dry-run` | Show intended actions without mutating remote |
+| `--optimized` | Skip files that already match remote hash |
+| `--prune` | Delete remote files that do not exist locally |
 
-### 1. `upload` — Parallel & Recursive
-
-- Multi-threaded (3–5 concurrent uploads)
-- Fully recursive
-- Rewritten upload pipeline
-
----
-
-### 2. `push`
-
-Designed for static site workflows.
-
-| Flag                | Description                       |
-| ------------------- | --------------------------------- |
-| `--optimized`       | Upload only changed/missing files |
-| `--ignore-dotfiles` | Skip `.git`, `.env`, etc.         |
-| `-e <folder>`       | Ignore folder recursively         |
-
-#### Examples
+Examples:
 
 ```bash
-neocities push --optimized --ignore-dotfiles .
-neocities push -e node_modules -e .git .
+neocities-red push .
+neocities-red push --optimized --ignore-dotfiles .
+neocities-red push -e node_modules -e .git .
+neocities-red diff . -e secret.txt
 ```
-
----
-
-### 3. `diff` — Local vs Remote
-
-Preview changes before uploading:
-
-```bash
-neocities diff .
-```
-
----
-
-### 4. Built-in Retries
-
-Handles:
-
-- SSL errors
-- timeouts
-- unstable Neocities API
-
-No more broken deploys due to transient failures.
 
 ---
 
@@ -126,13 +106,12 @@ No more broken deploys due to transient failures.
 ```ruby
 require 'neocities-red'
 
-client = Neocities::Client.new(api_key: 'YOUR_API_KEY')
+client = NeocitiesRed::Client.new(api_key: 'YOUR_API_KEY')
 
 client.upload(local_path, remote_path)
 client.delete(remote_path)
 client.list(remote_path)
 client.info(sitename)
-client.push(local_path)
 ```
 
 ---
@@ -140,19 +119,25 @@ client.push(local_path)
 ### Advanced: Services
 
 ```ruby
-client = Neocities::Client.new(
+client = NeocitiesRed::Client.new(
   sitename: 'o200',
   password: 'secret'
 )
 
-service = Neocities::Services::FileList.new(
+service = NeocitiesRed::Services::File::List.new(
   client,
-  path: '.',
-  detail: true
+  '.',
+  true
 )
 
 files = service.show
 ```
+
+Current service namespaces:
+
+- `NeocitiesRed::Services::File` (`File`, `FolderUploader`, `List`, `Remover`)
+- `NeocitiesRed::Services::Site` (`Pusher`, `Differencer`, `Exporter`, `Informer`)
+- `NeocitiesRed::Services::Common` (`Pizza`)
 
 ---
 
