@@ -106,7 +106,7 @@ module NeocitiesRed
 
         #{@pastel.dim 'Examples:'}
 
-        #{@pastel.green '$ neocities-red list /'}           List files in your root directory
+        #{@pastel.green '$ neocities-red list .'}           List files in your root directory
 
         #{@pastel.green '$ neocities-red list -a'}          Recursively display all files and directories
 
@@ -166,17 +166,17 @@ module NeocitiesRed
 
         #{@pastel.green '$ neocities-red push .'}                                 Recursively upload current directory.
 
-        #{@pastel.green '$ neocities-red push -e node_modules -e secret.txt .'}   Exclude certain files from push
+        #{@pastel.green '$ neocities-red push . -e node_modules -e secret.txt'}   Exclude certain files from push
 
-        #{@pastel.green '$ neocities-red push --no-gitignore .'}                  Don't use .gitignore to exclude files
+        #{@pastel.green '$ neocities-red push . --no-gitignore'}                  Don't use .gitignore to exclude files
 
-        #{@pastel.green '$ neocities-red push --ignore-dotfiles .'}               Ignore files with '.' at the beginning (for example, '.git/')
+        #{@pastel.green '$ neocities-red push . --ignore-dotfiles'}               Ignore files with '.' at the beginning (for example, '.git/')
 
-        #{@pastel.green '$ neocities-red push --dry-run .'}                       Just show what would be uploaded
+        #{@pastel.green '$ neocities-red push . --dry-run'}                       Just show what would be uploaded
 
-        #{@pastel.green '$ neocities-red push --optimized .'}                     Do not upload unchanged files.
+        #{@pastel.green '$ neocities-red push . --optimized'}                     Do not upload unchanged files.
 
-        #{@pastel.green '$ neocities-red push --prune .'}                         Delete site files not in dir (be careful!)
+        #{@pastel.green '$ neocities-red push . --prune'}                         Delete site files not in dir (be careful!)
       HERE
       exit
     end
@@ -226,6 +226,19 @@ module NeocitiesRed
       exit
     end
 
+    def display_purge_help_and_exit
+      display_banner
+
+      say <<~HERE
+        #{@pastel.green.bold 'purge'} - Remove all files from your site
+
+        #{@pastel.dim 'Examples:'}
+
+        #{@pastel.green '$ neocities-red purge -y'}
+      HERE
+      exit
+    end
+
     def display_banner
       say <<~HERE
 
@@ -240,16 +253,17 @@ module NeocitiesRed
       display_banner
       say <<~HERE
         #{@pastel.dim 'Subcommands:'}
-          push        Recursively upload a local directory to your site
-          upload      Upload individual files to your Neocities site
           delete      Delete files from your Neocities site
           diff        Compare your local directory with your Neocities site
-          list        List files from your Neocities site
           info        Information and stats for your site
+          list        List files from your Neocities site
           logout      Remove the site api key from the config
-          version     Unceremoniously display version and self destruct
-          pull        Get the most recent version of files from your site
           pizza       Order a free pizza
+          pull        Get the most recent version of files from your site
+          purge       Remove all files from your site
+          push        Recursively upload a local directory to your site
+          upload      Upload individual files to your Neocities site
+          version     Unceremoniously display version and self destruct
       HERE
       exit
     end

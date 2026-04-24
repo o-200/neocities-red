@@ -149,7 +149,10 @@ module NeocitiesRed
     end
 
     desc "purge", "Delete everything from your site (development only)"
+    method_option :yes, aliases: "-y", type: :boolean, default: false
     def purge
+      return display_help_for("purge") unless options[:yes]
+
       client = ensure_client!
       resp = client.list
       resp[:files].each do |file|
@@ -224,9 +227,7 @@ module NeocitiesRed
     end
 
     no_commands do
-      def display_help_for(command)
-        help(command)
-      end
+      alias_method :display_help_for, :help
 
       def display
         @display ||= NeocitiesRed::CliDisplay.new
@@ -269,7 +270,7 @@ module NeocitiesRed
       def authenticate_and_persist_key!
         display.display_login_prompt
 
-        @sitename ||= prompt.ask("sitename:", default: ENV.fetch("NEOCITIES_SITENAME", nil))
+        @sitename ||= prompt.ask("sitename/username:", default: ENV.fetch("NEOCITIES_SITENAME", nil))
         password = prompt.mask("password:", default: ENV.fetch("NEOCITIES_PASSWORD", nil))
 
         temp_client = NeocitiesRed::Client.new(sitename: @sitename, password: password)
