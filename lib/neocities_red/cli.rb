@@ -124,7 +124,7 @@ module NeocitiesRed
 
       client = ensure_client!
       if File.file?(local_path)
-        Services::File::File.new(client, local_path, remote_path).upload
+        Services::File::Uploader.new(client, local_path, remote_path).upload
       elsif File.directory?(local_path)
         folder_uploader = Services::File::FolderUploader.new(client, local_path, remote_path)
         files_list = folder_uploader.files

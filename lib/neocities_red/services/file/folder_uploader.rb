@@ -52,7 +52,7 @@ module NeocitiesRed
                 local_path  = ::File.join(base, file)
                 remote_path = ::File.join(@remote_path, file)
 
-                File.new(@client, local_path, remote_path).upload
+                Uploader.new(@client, local_path, remote_path).upload
               end
             end
           end

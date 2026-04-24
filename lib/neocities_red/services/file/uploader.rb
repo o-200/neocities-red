@@ -8,7 +8,7 @@ module NeocitiesRed
     module File
       class FileIsNotExists < StandardError; end
 
-      class File
+      class Uploader
         def initialize(client, filepath, remote_path = nil)
           @client = client
           @filepath = filepath

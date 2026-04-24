@@ -135,7 +135,7 @@ files = service.show
 
 Current service namespaces:
 
-- `NeocitiesRed::Services::File` (`File`, `FolderUploader`, `List`, `Remover`)
+- `NeocitiesRed::Services::File` (`Uploader`, `FolderUploader`, `List`, `Remover`)
 - `NeocitiesRed::Services::Site` (`Pusher`, `Differencer`, `Exporter`, `Informer`)
 - `NeocitiesRed::Services::Common` (`Pizza`)
 

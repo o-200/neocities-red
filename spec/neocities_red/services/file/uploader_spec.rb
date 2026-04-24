@@ -3,7 +3,7 @@
 require "fileutils"
 require "spec_helper"
 
-RSpec.describe NeocitiesRed::Services::File::File do
+RSpec.describe NeocitiesRed::Services::File::Uploader do
   let(:client) { instance_double(NeocitiesRed::Client) }
   let(:filepath) { "/path/to/file.txt" }
   let(:remote_path) { "file.txt" }

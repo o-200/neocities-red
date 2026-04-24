@@ -5,7 +5,7 @@ require File.join(File.dirname(__FILE__), "neocities_red", "client")
 require File.join(File.dirname(__FILE__), "neocities_red", "cli_display")
 require File.join(File.dirname(__FILE__), "neocities_red", "cli")
 
-require File.join(File.dirname(__FILE__), "neocities_red", "services", "file", "file")
+require File.join(File.dirname(__FILE__), "neocities_red", "services", "file", "uploader")
 require File.join(File.dirname(__FILE__), "neocities_red", "services", "file", "folder_uploader")
 require File.join(File.dirname(__FILE__), "neocities_red", "services", "file", "remover")
 require File.join(File.dirname(__FILE__), "neocities_red", "services", "file", "list")

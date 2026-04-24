@@ -108,7 +108,7 @@ module NeocitiesRed
 
                 next if path.nil? || path.directory?
 
-                Services::File::File.new(@client, path, path).upload
+                Services::File::Uploader.new(@client, path, path).upload
               end
             end
           end
