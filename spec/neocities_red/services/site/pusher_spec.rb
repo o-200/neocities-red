@@ -3,7 +3,7 @@
 require "spec_helper"
 require "tmpdir"
 
-RSpec.describe NeocitiesRed::Services::SitePusher do
+RSpec.describe NeocitiesRed::Services::Site::Pusher do
   subject(:service) do
     described_class.new(
       client,
@@ -37,7 +37,7 @@ RSpec.describe NeocitiesRed::Services::SitePusher do
   let(:prune) { false }
   let(:optimized) { false }
   let(:root) { tmp_root }
-  let(:uploader_instance) { instance_double(NeocitiesRed::Services::FileUploader, upload: nil) }
+  let(:uploader_instance) { instance_double(NeocitiesRed::Services::File::File, upload: nil) }
   let(:upload_calls) { [] }
 
   let(:tmp_root) do
@@ -47,7 +47,7 @@ RSpec.describe NeocitiesRed::Services::SitePusher do
   end
 
   before do
-    allow(NeocitiesRed::Services::FileUploader).to receive(:new) do |_client, filepath, remote_path|
+    allow(NeocitiesRed::Services::File::File).to receive(:new) do |_client, filepath, remote_path|
       upload_calls << [filepath.to_s, remote_path.to_s]
       uploader_instance
     end

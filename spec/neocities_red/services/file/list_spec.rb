@@ -3,7 +3,7 @@
 require "spec_helper"
 require "stringio"
 
-RSpec.describe NeocitiesRed::Services::FileList do
+RSpec.describe NeocitiesRed::Services::File::List do
   let(:client) { instance_double(NeocitiesRed::Client) }
   let(:path) { nil }
   let(:detail) { false }

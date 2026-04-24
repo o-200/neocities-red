@@ -94,7 +94,7 @@ module NeocitiesRed
     end
 
     def display_pizza_help_and_exit
-      say Services::Pizza.new.make_order
+      say Services::Common::Pizza.new.make_order
       exit
     end
 

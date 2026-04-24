@@ -29,7 +29,7 @@ module NeocitiesRed
       client = ensure_client!
       exclude = build_diff_exclusions(path, Array(options[:exclude]))
 
-      added, modified, removed = Services::SiteDifference.new(
+      added, modified, removed = Services::Site::Differencer.new(
         client,
         path: path,
         detail: false,
@@ -46,7 +46,7 @@ module NeocitiesRed
       return display_help_for("delete") if paths.empty? || help_requested?(options[:help], paths)
 
       client = ensure_client!
-      paths.each { |path| Services::FileRemover.new(client, path).remove }
+      paths.each { |path| Services::File::Remover.new(client, path).remove }
     end
 
     desc "logout", "Remove the site api key from the config"
@@ -65,7 +65,7 @@ module NeocitiesRed
       return display_help_for("info") if help_requested?(options[:help], sitename)
 
       client = ensure_client!
-      profile_info = Services::ProfileInfo.new(client, [sitename].compact, @sitename).pretty_print
+      profile_info = Services::Site::Informer.new(client, [sitename].compact, @sitename).pretty_print
       display.say TTY::Table.new(profile_info)
     rescue StandardError => e
       display.display_response(e)
@@ -83,7 +83,7 @@ module NeocitiesRed
 
       client = ensure_client!
       path = nil if options[:all]
-      display.say Services::FileList.new(client, path, options[:detail]).show
+      display.say Services::File::List.new(client, path, options[:detail]).show
     end
 
     desc "push PATH", "Recursively upload a local directory to your Neocities site"
@@ -100,7 +100,7 @@ module NeocitiesRed
       client = ensure_client!
       return display_help_for("push") if root.nil?
 
-      Services::SitePusher.new(
+      Services::Site::Pusher.new(
         client,
         display,
         root: root,
@@ -124,9 +124,9 @@ module NeocitiesRed
 
       client = ensure_client!
       if File.file?(local_path)
-        Services::FileUploader.new(client, local_path, remote_path).upload
+        Services::File::File.new(client, local_path, remote_path).upload
       elsif File.directory?(local_path)
-        folder_uploader = Services::FolderUploader.new(client, local_path, remote_path)
+        folder_uploader = Services::File::FolderUploader.new(client, local_path, remote_path)
         files_list = folder_uploader.files
         folder_uploader.upload(files_list)
       end
@@ -144,8 +144,8 @@ module NeocitiesRed
       last_pull_time = data.dig("LAST_PULL", "time")
       last_pull_loc = data.dig("LAST_PULL", "loc")
 
-      Services::SiteExporter.new(client, @sitename, data, app_config_path)
-                            .export(quiet: options[:quiet], last_pull_time: last_pull_time, last_pull_loc: last_pull_loc)
+      Services::Site::Exporter.new(client, @sitename, data, app_config_path)
+                              .export(quiet: options[:quiet], last_pull_time: last_pull_time, last_pull_loc: last_pull_loc)
     end
 
     desc "purge", "Delete everything from your site (development only)"

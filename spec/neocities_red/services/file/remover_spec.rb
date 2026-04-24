@@ -3,7 +3,7 @@
 require "spec_helper"
 require "stringio"
 
-RSpec.describe NeocitiesRed::Services::FileRemover do
+RSpec.describe NeocitiesRed::Services::File::Remover do
   subject(:remover) { described_class.new(client, filepath) }
 
   let(:client) { instance_double(NeocitiesRed::Client) }

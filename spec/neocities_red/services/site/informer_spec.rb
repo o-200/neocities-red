@@ -3,7 +3,7 @@
 require "spec_helper"
 require "time"
 
-RSpec.describe NeocitiesRed::Services::ProfileInfo do
+RSpec.describe NeocitiesRed::Services::Site::Informer do
   let(:client) { instance_double(NeocitiesRed::Client) }
   let(:sitename) { "test-site" }
   let(:subargs) { [] }
