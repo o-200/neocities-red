@@ -6,4 +6,4 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 require "neocities_red"
 
-NeocitiesRed::CLI.new(ARGV).run
+NeocitiesRed::CLI.start(ARGV)

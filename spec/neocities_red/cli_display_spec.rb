@@ -110,8 +110,8 @@ RSpec.describe NeocitiesRed::CliDisplay do
     end
 
     it "prints pizza text and exits" do
-      pizza = instance_double(NeocitiesRed::Services::Pizza, make_order: "pizza unavailable")
-      allow(NeocitiesRed::Services::Pizza).to receive(:new).and_return(pizza)
+      pizza = instance_double(NeocitiesRed::Services::Common::Pizza, make_order: "pizza unavailable")
+      allow(NeocitiesRed::Services::Common::Pizza).to receive(:new).and_return(pizza)
 
       expect { display.display_pizza_help_and_exit }.to raise_error(SystemExit)
       expect(text_output).to include("pizza unavailable")

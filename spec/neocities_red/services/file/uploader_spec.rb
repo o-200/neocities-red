@@ -3,7 +3,7 @@
 require "fileutils"
 require "spec_helper"
 
-RSpec.describe NeocitiesRed::Services::FileUploader do
+RSpec.describe NeocitiesRed::Services::File::Uploader do
   let(:client) { instance_double(NeocitiesRed::Client) }
   let(:filepath) { "/path/to/file.txt" }
   let(:remote_path) { "file.txt" }
@@ -17,7 +17,7 @@ RSpec.describe NeocitiesRed::Services::FileUploader do
 
       it "raises FileIsNotExists error" do
         expect { uploader.upload }.to raise_error(
-          NeocitiesRed::Services::FileIsNotExists,
+          NeocitiesRed::Services::File::FileIsNotExists,
           /does not exist locally/
         )
       end

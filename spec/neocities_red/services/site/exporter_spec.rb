@@ -4,7 +4,7 @@ require "spec_helper"
 require "json"
 require "fileutils"
 
-RSpec.describe NeocitiesRed::Services::SiteExporter do
+RSpec.describe NeocitiesRed::Services::Site::Exporter do
   let(:client) { instance_double(NeocitiesRed::Client) }
   let(:sitename) { "test-site" }
   let(:spec_root) { File.expand_path("..", __dir__) }

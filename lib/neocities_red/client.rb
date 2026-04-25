@@ -29,8 +29,8 @@ module NeocitiesRed
       @opts = opts
       @pastel = Pastel.new eachline: "\n"
       @conn = Faraday.new(@uri) do |conn|
-        conn.options.timeout = 10
-        conn.options.open_timeout = 5
+        conn.options.timeout = 30
+        conn.options.open_timeout = 10
         conn.adapter :net_http
 
         conn.request :multipart

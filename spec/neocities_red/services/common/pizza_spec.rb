@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-RSpec.describe NeocitiesRed::Services::Pizza do
+RSpec.describe NeocitiesRed::Services::Common::Pizza do
   describe "#make_order" do
     let(:pizza) { described_class.new }
 

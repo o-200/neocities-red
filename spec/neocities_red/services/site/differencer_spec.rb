@@ -6,7 +6,7 @@ require "digest"
 require "pathname"
 require "pastel"
 
-RSpec.describe NeocitiesRed::Services::SiteDifference do
+RSpec.describe NeocitiesRed::Services::Site::Differencer do
   subject(:service) do
     described_class.new(
       client,
@@ -29,7 +29,7 @@ RSpec.describe NeocitiesRed::Services::SiteDifference do
 
   let(:file_list_service) do
     instance_double(
-      NeocitiesRed::Services::FileList,
+      NeocitiesRed::Services::File::List,
       show: server_files
     )
   end
@@ -37,7 +37,7 @@ RSpec.describe NeocitiesRed::Services::SiteDifference do
   before do
     allow(Pastel).to receive(:new).with(eachline: "\n").and_return(pastel)
 
-    allow(NeocitiesRed::Services::FileList).to receive(:new)
+    allow(NeocitiesRed::Services::File::List).to receive(:new)
       .and_return(file_list_service)
 
     allow(Dir).to receive(:chdir).with(Pathname(path)).and_yield
@@ -96,7 +96,7 @@ RSpec.describe NeocitiesRed::Services::SiteDifference do
     it "requests server files with FileList service" do
       service.show
 
-      expect(NeocitiesRed::Services::FileList).to have_received(:new)
+      expect(NeocitiesRed::Services::File::List).to have_received(:new)
         .with(client, nil, detail)
       expect(file_list_service).to have_received(:show)
     end
@@ -155,7 +155,7 @@ RSpec.describe NeocitiesRed::Services::SiteDifference do
     it "sets detail to false when nil is passed" do
       service.show
 
-      expect(NeocitiesRed::Services::FileList).to have_received(:new)
+      expect(NeocitiesRed::Services::File::List).to have_received(:new)
         .with(client, nil, false)
     end
   end

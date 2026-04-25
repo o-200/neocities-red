@@ -5,382 +5,171 @@ require "tty/table"
 require "tty/prompt"
 require "fileutils"
 require "json"
-require "whirly"
-require "digest"
-require "time"
+require "thor"
 require_relative "cli_display"
 
-# warning - the big quantity of working threads could be considered like-a DDOS.
-# Your ip-address could get banned for a few days.
-MAX_THREADS = 5
-
 module NeocitiesRed
-  class CLI
-    SUBCOMMANDS = %w[upload delete list info push logout pizza pull purge diff].freeze
-    HELP_SUBCOMMANDS = ["-h", "--help", "help"].freeze
+  class CLI < Thor
+    package_name "neocities-red"
+    default_task :help
+    map %w[-h --help] => :help
+    map %w[-v --version] => :version
 
-    def initialize(argv)
-      @argv = argv.dup
-      @display = NeocitiesRed::CliDisplay.new
-      @subcmd = @argv.first
-      @subargs = @argv[1..@argv.length]
-      @prompt = TTY::Prompt.new
-      @api_key = ENV["NEOCITIES_API_KEY"] || nil
-      @app_config_path = File.join self.class.app_config_path("neocities"), "config.json"
-    end
+    class_option :api_key,
+                 type: :string,
+                 desc: "Use a specific API key instead of reading from env/config"
 
-    def run
-      if @argv[0] == "version"
-        @display.say NeocitiesRed::VERSION
-        exit
-      end
+    desc "diff [PATH]", "Compare local files with remote and show differences"
+    method_option :help, aliases: "-h", type: :boolean
+    method_option :ignore_dotfiles, type: :boolean, default: false
+    method_option :exclude, aliases: "-e", type: :string, repeatable: true, default: []
+    def diff(path = ".")
+      return display_help_for("diff") if help_requested?(options[:help], path)
 
-      if HELP_SUBCOMMANDS.include?(@subcmd) && SUBCOMMANDS.include?(@subargs[0])
-        @display.public_send("display_#{@subargs[0]}_help_and_exit")
-      elsif @subcmd.nil? || !SUBCOMMANDS.include?(@subcmd)
-        @display.display_help_and_exit
-      elsif @subargs.join.match(HELP_SUBCOMMANDS.join("|")) && @subcmd != "info"
-        @display.public_send("display_#{@subcmd}_help_and_exit")
+      client = ensure_client!
+      exclude = build_diff_exclusions(path, Array(options[:exclude]))
 
-      end
-
-      unless @api_key
-        begin
-          file = File.read @app_config_path
-          data = JSON.parse file
-
-          if data
-            @api_key = data["API_KEY"].strip
-            @sitename = data["SITENAME"]
-            @last_pull = data["LAST_PULL"] # Store the last time a pull was performed so that we only fetch from updated files
-          end
-        rescue Errno::ENOENT
-          @api_key = nil
-        end
-      end
-
-      if @api_key.nil?
-        @display.display_login_prompt
-
-        if !@sitename && !@password
-          @sitename = @prompt.ask("sitename:", default: ENV.fetch("NEOCITIES_SITENAME", nil))
-          @password = @prompt.mask("password:", default: ENV.fetch("NEOCITIES_PASSWORD", nil))
-        end
-
-        @client = NeocitiesRed::Client.new sitename: @sitename, password: @password
-
-        resp = @client.key
-        if resp[:api_key]
-          conf = {
-            API_KEY: resp[:api_key],
-            SITENAME: @sitename
-          }
-
-          FileUtils.mkdir_p Pathname(@app_config_path).dirname
-          File.write @app_config_path, conf.to_json
-
-          @display.display_api_key_saved(@sitename, @app_config_path)
-        else
-          @display.display_response(resp)
-          exit
-        end
-      else
-        @client = NeocitiesRed::Client.new api_key: @api_key
-      end
-
-      send @subcmd
-    end
-
-    def diff
-      @display.display_diff_help_and_exit if @subargs.empty?
-
-      @ignore_dotfiles = false
-      @path = "."
-      @exclude = []
-
-      loop do
-        arg = @subargs[0]
-        break if arg.nil?
-
-        if arg == "--ignore-dotfiles"
-          @subargs.shift
-          @ignore_dotfiles = true
-
-        elsif arg == "-e"
-          @subargs.shift
-
-          base = Pathname.new(@path).expand_path
-          target = Pathname.new(@subargs[0]).expand_path
-          filepath = target.relative_path_from(base).to_s
-
-          if File.file?(target)
-            @exclude << filepath
-          elsif File.directory?(target)
-            @exclude += Dir.glob(
-              File.join(target, "**", "*"),
-              File::FNM_DOTMATCH
-            ).map do |path|
-              Pathname.new(path).expand_path.relative_path_from(base).to_s
-            end
-
-            @exclude << filepath
-          end
-
-          @subargs.shift
-
-        elsif File.directory?(arg)
-          @path = arg
-          @subargs.shift
-        end
-      end
-
-      added, modified, removed = Services::SiteDifference.new(
-        @client,
-        path: @path,
+      added, modified, removed = Services::Site::Differencer.new(
+        client,
+        path: path,
         detail: false,
-        ignore_dotfiles: @ignore_dotfiles,
-        exclude: @exclude
+        ignore_dotfiles: options[:ignore_dotfiles],
+        exclude: exclude
       ).show
 
-      @display.display_diff_results(added: added, modified: modified, removed: removed)
+      display.display_diff_results(added: added, modified: modified, removed: removed)
     end
 
-    def delete
-      @display.display_delete_help_and_exit if @subargs.empty?
+    desc "delete PATH [PATH ...]", "Delete files on your Neocities site"
+    method_option :help, aliases: "-h", type: :boolean
+    def delete(*paths)
+      return display_help_for("delete") if paths.empty? || help_requested?(options[:help], paths)
 
-      @subargs.each do |path|
-        Services::FileRemover.new(@client, path).remove
-      end
+      client = ensure_client!
+      paths.each { |path| Services::File::Remover.new(client, path).remove }
     end
 
+    desc "logout", "Remove the site api key from the config"
+    method_option :help, aliases: "-h", type: :boolean
+    method_option :yes, aliases: "-y", type: :boolean, default: false
     def logout
-      confirmed = false
+      return display_help_for("logout") if help_requested?(options[:help]) || !options[:yes]
 
-      loop do
-        case @subargs[0]
-        when "-y"
-          @subargs.shift
-          confirmed = true
-        when /^-/
-          @display.display_unknown_option(@subargs[0])
-          break
-        else
-          break
-        end
-      end
-
-      if confirmed
-        FileUtils.rm @app_config_path
-        @display.display_logout_success
-      else
-        @display.display_logout_help_and_exit
-      end
+      FileUtils.rm_f(app_config_path)
+      display.display_logout_success
     end
 
-    def info
-      profile_info = Services::ProfileInfo.new(@client, @subargs, @sitename).pretty_print
-      @display.say TTY::Table.new(profile_info)
+    desc "info [SITENAME]", "Get site info"
+    method_option :help, aliases: "-h", type: :boolean
+    def info(sitename = nil)
+      return display_help_for("info") if help_requested?(options[:help], sitename)
+
+      client = ensure_client!
+      profile_info = Services::Site::Informer.new(client, [sitename].compact, @sitename).pretty_print
+      display.say TTY::Table.new(profile_info)
     rescue StandardError => e
-      @display.display_response(e)
+      display.display_response(e)
     end
 
-    def list
-      @display.display_list_help_and_exit if @subargs.empty?
+    desc "list [PATH]", "List files on your Neocities site"
+    method_option :help, aliases: "-h", type: :boolean
+    method_option :detail, aliases: "-d", type: :boolean, default: false
+    method_option :all, aliases: "-a", type: :boolean, default: false
+    def list(path = nil)
+      if help_requested?(options[:help], path) || (path.nil? && options[:all].nil? && options[:detail].nil?)
+        display_help_for("list")
+        return
+      end
 
-      @detail = true if @subargs.delete("-d") == "-d"
-
-      @subargs[0] = nil if @subargs.delete("-a")
-
-      path = @subargs[0]
-
-      @display.say Services::FileList.new(@client, path, @detail).show
+      client = ensure_client!
+      path = nil if options[:all]
+      display.say Services::File::List.new(client, path, options[:detail]).show
     end
 
-    def push
-      @display.display_push_help_and_exit if @subargs.empty?
-      @no_gitignore = false
-      @ignore_dotfiles = false
-      @excluded_files = []
-      @dry_run = false
-      @prune = false
-      @optimized = false
+    desc "push PATH", "Recursively upload a local directory to your Neocities site"
+    method_option :help, aliases: "-h", type: :boolean
+    method_option :no_gitignore, type: :boolean, default: false
+    method_option :ignore_dotfiles, type: :boolean, default: false
+    method_option :exclude, aliases: "-e", type: :string, repeatable: true, default: []
+    method_option :dry_run, type: :boolean, default: false
+    method_option :prune, type: :boolean, default: false
+    method_option :optimized, type: :boolean, default: false
+    def push(root = nil)
+      return display_help_for("push") if help_requested?(options[:help], root)
 
-      loop do
-        case @subargs[0]
-        when "--no-gitignore"
-          @subargs.shift
-          @no_gitignore = true
-        when "--ignore-dotfiles"
-          @subargs.shift
-          @ignore_dotfiles = true
-        when "-e"
-          @subargs.shift
-          filepath = Pathname.new(@subargs.shift).cleanpath.to_s
+      client = ensure_client!
+      return display_help_for("push") if root.nil?
 
-          if File.file?(filepath)
-            @excluded_files.push(filepath)
-          elsif File.directory?(filepath)
-            folder_files = Dir.glob(File.join(filepath, "**", "*"), File::FNM_DOTMATCH).push(filepath)
-            @excluded_files += folder_files
-          end
-        when "--dry-run"
-          @subargs.shift
-          @dry_run = true
-        when "--prune"
-          @subargs.shift
-          @prune = true
-        when "--optimized"
-          @subargs.shift
-          @optimized = true
-        when /^-/
-          @display.display_unknown_option(@subargs[0])
-          @display.display_push_help_and_exit
-        else
-          break
-        end
-      end
-
-      if @subargs[0].nil?
-        @display.display_response(result: "error", message: "no local path provided")
-        @display.display_push_help_and_exit
-      end
-
-      root_path = Pathname @subargs[0]
-
-      unless root_path.exist?
-        @display.display_response(result: "error", message: "path #{root_path} does not exist")
-        @display.display_push_help_and_exit
-      end
-
-      unless root_path.directory?
-        @display.display_response(result: "error", message: "provided path is not a directory")
-        @display.display_push_help_and_exit
-      end
-
-      @display.display_dry_run_notice if @dry_run
-
-      if @prune
-        pruned_dirs = []
-        resp = @client.list
-        resp[:files].each do |file|
-          path = Pathname(File.join(@subargs[0], file[:path]))
-
-          pruned_dirs << path if !path.exist? && file[:is_directory]
-
-          next unless !path.exist? && !pruned_dirs.include?(path.dirname)
-
-          @display.display_delete_progress(file[:path])
-          resp = @client.delete_wrapper_with_dry_run file[:path], @dry_run
-
-          if resp[:result] == "success"
-            @display.display_delete_success
-          else
-            @display.display_delete_error(resp)
-          end
-        end
-      end
-
-      Dir.chdir(root_path) do
-        paths = Dir.glob(File.join("**", "*"), File::FNM_DOTMATCH)
-
-        if @no_gitignore == false && File.exist?(".gitignore")
-          ignores = File.readlines(".gitignore").map do |ignore|
-            ignore = ignore.strip
-            File.directory?(ignore) ? "#{ignore}**" : ignore
-          end
-
-          paths.select! do |path|
-            ignores.none? { |ignore| File.fnmatch?(ignore, path) }
-          end
-
-          @display.display_gitignore_hint
-        end
-
-        @excluded_files += paths.select { |path| path.start_with?(".") } if @ignore_dotfiles
-
-        # do not upload files which already uploaded (checking by sha1_hash)
-        if @optimized
-          hex = paths.select { |path| File.file?(path) }
-                     .map { |file| { filepath: file, sha1_hash: Digest::SHA1.file(file).hexdigest } }
-
-          res = @client.list
-          server_hex = res[:files].map { |n| n[:sha1_hash] }.compact
-
-          uploaded_files = hex.select { |n| server_hex.include?(n[:sha1_hash]) }
-                              .map { |n| n[:filepath] }
-          @excluded_files += uploaded_files
-        end
-
-        paths -= @excluded_files
-        paths.collect! { |path| Pathname path }
-
-        task_queue = Queue.new
-        paths.each { |path| task_queue.push(path) }
-
-        threads = []
-
-        MAX_THREADS.times do
-          threads << Thread.new do
-            until task_queue.empty?
-              path = begin
-                task_queue.pop(true)
-              rescue StandardError
-                nil
-              end
-              next if path.nil? || path.directory?
-
-              Services::FileUploader.new(@client, path, path).upload
-            end
-          end
-        end
-
-        threads.each(&:join)
-        @display.display_upload_complete
-      end
+      Services::Site::Pusher.new(
+        client,
+        display,
+        root: root,
+        no_gitignore: options[:no_gitignore],
+        ignore_dotfiles: options[:ignore_dotfiles],
+        exclude: Array(options[:exclude]),
+        dry_run: options[:dry_run],
+        prune: options[:prune],
+        optimized: options[:optimized]
+      ).push
+    rescue ArgumentError => e
+      display.display_response(result: "error", message: e.message)
+      display_help_for("push")
     end
 
-    def upload
-      @display.display_upload_help_and_exit if @subargs[0].nil? || @subargs[1].nil?
+    desc "upload LOCAL_PATH REMOTE_PATH", "Upload a file/folder to your Neocities site"
+    method_option :help, aliases: "-h", type: :boolean
+    def upload(local_path = nil, remote_path = nil)
+      return display_help_for("upload") if help_requested?(options[:help], [local_path, remote_path])
+      return display_help_for("upload") if local_path.nil? || remote_path.nil?
 
-      if File.file?(@subargs[0])
-        Services::FileUploader.new(@client, @subargs[0], @subargs[1]).upload
-      elsif File.directory?(@subargs[0])
-        folder_uploader = Services::FolderUploader.new(@client, @subargs[0], @subargs[1])
+      client = ensure_client!
+      if File.file?(local_path)
+        Services::File::Uploader.new(client, local_path, remote_path).upload
+      elsif File.directory?(local_path)
+        folder_uploader = Services::File::FolderUploader.new(client, local_path, remote_path)
         files_list = folder_uploader.files
         folder_uploader.upload(files_list)
       end
     end
 
+    desc "pull", "Get the most recent version of files from your site"
+    method_option :help, aliases: "-h", type: :boolean
+    method_option :quiet, aliases: "-q", type: :boolean, default: false
     def pull
-      quiet = ["--quiet", "-q"].include?(@subargs[0])
+      return display_help_for("pull") if help_requested?(options[:help])
 
-      file = File.read(@app_config_path)
-      data = JSON.parse(file)
+      client = ensure_client!
+      data = read_config || {}
 
       last_pull_time = data.dig("LAST_PULL", "time")
       last_pull_loc = data.dig("LAST_PULL", "loc")
 
-      Services::SiteExporter.new(@client, @sitename, data, @app_config_path)
-                            .export(quiet:, last_pull_time:, last_pull_loc:)
+      Services::Site::Exporter.new(client, @sitename, data, app_config_path)
+                              .export(quiet: options[:quiet], last_pull_time: last_pull_time, last_pull_loc: last_pull_loc)
     end
 
-    # only for development purposes
+    desc "purge", "Delete everything from your site (development only)"
+    method_option :yes, aliases: "-y", type: :boolean, default: false
     def purge
-      resp = @client.list
-      resp[:files].each do |file|
-        @display.display_delete_progress(file[:path])
-        resp = @client.delete_wrapper_with_dry_run(file[:path], dry_run: @dry_run)
+      return display_help_for("purge") unless options[:yes]
 
-        if resp[:result] == "success"
-          @display.display_delete_success
+      client = ensure_client!
+      resp = client.list
+      resp[:files].each do |file|
+        display.display_delete_progress(file[:path])
+        delete_resp = client.delete_wrapper_with_dry_run(file[:path], dry_run: options[:dry_run])
+
+        if delete_resp[:result] == "success"
+          display.display_delete_success
         else
-          @display.display_delete_error(resp)
+          display.display_delete_error(delete_resp)
         end
       end
     end
 
+    desc "pizza", "Order a free pizza"
     def pizza
-      @display.display_pizza_help_and_exit
+      display_help_for(__method__)
     end
 
     def self.app_config_path(name)
@@ -420,6 +209,127 @@ module NeocitiesRed
       end
 
       nil
+    end
+
+    desc "help [COMMAND]", "Show help for a command"
+    def help(command = nil)
+      return display.display_help_and_exit if command.nil?
+
+      custom_help_method = "display_#{command}_help_and_exit"
+      return display.public_send(custom_help_method) if display.respond_to?(custom_help_method)
+
+      super
+    end
+
+    desc "version", "Display neocities-red version"
+    def version
+      display.say NeocitiesRed::VERSION
+    end
+
+    no_commands do
+      alias_method :display_help_for, :help
+
+      def display
+        @display ||= NeocitiesRed::CliDisplay.new
+      end
+
+      def prompt
+        @prompt ||= TTY::Prompt.new
+      end
+
+      def app_config_path
+        @app_config_path ||= File.join(self.class.app_config_path("neocities"), "config.json")
+      end
+
+      def read_config
+        file = File.read(app_config_path)
+        JSON.parse(file)
+      rescue Errno::ENOENT
+        nil
+      end
+
+      def ensure_client!
+        return @client if @client
+
+        config = read_config
+        @sitename = config && config["SITENAME"]
+        @last_pull = config && config["LAST_PULL"]
+
+        @api_key = options[:api_key] || ENV.fetch("NEOCITIES_API_KEY", nil)
+        @api_key ||= config && config["API_KEY"]&.strip
+
+        if @api_key.nil? || @api_key.empty?
+          authenticate_and_persist_key!
+        else
+          @client = NeocitiesRed::Client.new(api_key: @api_key)
+        end
+
+        @client
+      end
+
+      def authenticate_and_persist_key!
+        display.display_login_prompt
+
+        @sitename ||= prompt.ask("sitename/username:", default: ENV.fetch("NEOCITIES_SITENAME", nil))
+        password = prompt.mask("password:", default: ENV.fetch("NEOCITIES_PASSWORD", nil))
+
+        temp_client = NeocitiesRed::Client.new(sitename: @sitename, password: password)
+        resp = temp_client.key
+
+        unless resp[:api_key]
+          display.display_response(resp)
+          raise Thor::Error, "failed to obtain API key"
+        end
+
+        @api_key = resp[:api_key]
+        conf = {
+          API_KEY: @api_key,
+          SITENAME: @sitename
+        }
+
+        FileUtils.mkdir_p(Pathname(app_config_path).dirname)
+        File.write(app_config_path, conf.to_json)
+        display.display_api_key_saved(@sitename, app_config_path)
+        @client = NeocitiesRed::Client.new(api_key: @api_key)
+      end
+
+      def build_diff_exclusions(base_path, excluded_entries)
+        base = Pathname.new(base_path).expand_path
+        excludes = []
+
+        excluded_entries.each do |entry|
+          target = Pathname.new(entry).expand_path
+          next unless target.exist?
+
+          filepath = target.relative_path_from(base).to_s
+
+          if File.file?(target)
+            excludes << filepath
+          elsif File.directory?(target)
+            excludes.concat(
+              Dir.glob(File.join(target, "**", "*"), File::FNM_DOTMATCH).map do |path|
+                Pathname.new(path).expand_path.relative_path_from(base).to_s
+              end
+            )
+            excludes << filepath
+          end
+        end
+
+        excludes
+      end
+
+      def help_requested_for?(value)
+        case value
+        when Array
+          value.any? { |item| ["-h", "--help", "help"].include?(item) }
+        else
+          ["-h", "--help", "help"].include?(value)
+        end
+      end
+
+      def help_requested?(help_option, value = nil)
+        help_option || (value && help_requested_for?(value))
+      end
     end
   end
 end
