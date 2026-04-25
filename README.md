@@ -38,11 +38,6 @@ Not a programmer?
 - Install Ruby here - https://www.ruby-lang.org/en/
 - For Windows you should have installed MSYS2 and MINGW
 
-Using version managers:
-
-- `mise`
-- `asdf`
-
 ---
 
 ### Install
@@ -92,8 +87,8 @@ Examples:
 
 ```bash
 neocities-red push .
-neocities-red push --optimized --ignore-dotfiles .
-neocities-red push -e node_modules -e .git .
+neocities-red push . --optimized --ignore-dotfiles
+neocities-red push . -e node_modules -e .git
 neocities-red diff . -e secret.txt
 ```
 
@@ -143,12 +138,7 @@ Current service namespaces:
 
 ## Contributing
 
-1. Check existing issues
-2. Comment: "I'll take this"
-3. Fork the repo
-4. Create a feature branch
-5. Implement + test
-6. Open a PR
+see CONTRIBUTING.md
 
 ---
 
