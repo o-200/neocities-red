@@ -155,11 +155,15 @@ module NeocitiesRed
 
       client = ensure_client!
       resp = client.list
-      resp[:files].each do |file|
+      deleted_dirs = []
+      resp[:files].sort_by { |f| f[:is_directory] ? 0 : 1 }.each do |file|
+        next if deleted_dirs.any? { |dir| file[:path].start_with?(dir) }
+
         display.display_delete_progress(file[:path])
         delete_resp = client.delete_wrapper_with_dry_run(file[:path], dry_run: options[:dry_run])
 
         if delete_resp[:result] == "success"
+          deleted_dirs << file[:path] if file[:is_directory]
           display.display_delete_success
         else
           display.display_delete_error(delete_resp)
