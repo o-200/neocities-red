@@ -120,7 +120,7 @@ RSpec.describe NeocitiesRed::CliDisplay do
     {
       display_list_help_and_exit: "list - List files on your Neocities site",
       display_delete_help_and_exit: "delete - Delete files on your Neocities site",
-      display_upload_help_and_exit: "upload - Upload file to your Neocities site",
+      display_upload_help_and_exit: "upload - Upload a file/folder to a path on your Neocities site",
       display_pull_help_and_exit: "pull - Get the most recent version of files from your site",
       display_push_help_and_exit: "push - Recursively upload a local directory to your Neocities site",
       display_diff_help_and_exit: "diff - Compare local files with remote and show differences.",

@@ -116,17 +116,18 @@ module NeocitiesRed
       display_help_for("push")
     end
 
-    desc "upload LOCAL_PATH REMOTE_PATH", "Upload a file/folder to your Neocities site"
+    desc "upload LOCAL_PATH [REMOTE_PATH]", "Upload a file/folder to your Neocities site"
     method_option :help, aliases: "-h", type: :boolean
     def upload(local_path = nil, remote_path = nil)
       return display_help_for("upload") if help_requested?(options[:help], [local_path, remote_path])
-      return display_help_for("upload") if local_path.nil? || remote_path.nil?
+      return display_help_for("upload") if local_path.nil?
 
       client = ensure_client!
+      dest = remote_path || File.basename(local_path)
       if File.file?(local_path)
-        Services::File::Uploader.new(client, local_path, remote_path).upload
+        Services::File::Uploader.new(client, local_path, dest).upload
       elsif File.directory?(local_path)
-        folder_uploader = Services::File::FolderUploader.new(client, local_path, remote_path)
+        folder_uploader = Services::File::FolderUploader.new(client, local_path, dest)
         files_list = folder_uploader.files
         folder_uploader.upload(files_list)
       end

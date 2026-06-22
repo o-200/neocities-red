@@ -136,13 +136,23 @@ module NeocitiesRed
       display_banner
 
       say <<~HERE
-        #{@pastel.green.bold 'upload'} - Upload file to your Neocities site to the specific path
+        #{@pastel.green.bold 'upload'} - Upload a file/folder to a path on your Neocities site
+
+        #{@pastel.dim 'Usage:'}
+
+            neocities-red upload LOCAL_PATH [REMOTE_PATH]
+
+        REMOTE_PATH defaults to the basename of LOCAL_PATH when omitted.
 
         #{@pastel.dim 'Examples:'}
 
-        #{@pastel.green '$ neocities-red upload ./img.jpg ./images/img2.jpg'} Upload img.jpg to /images folder and with img2.jpg name
+        #{@pastel.green '$ neocities-red upload foo.html'}             Uploads foo.html as /foo.html
 
-        #{@pastel.green '$ neocities-red upload images/ images/'} Upload images folder with their content to /images folder
+        #{@pastel.green '$ neocities-red upload images/'}              Uploads images/ contents to /images/
+
+        #{@pastel.green '$ neocities-red upload images/ assets/'}      Uploads images/ contents to /assets/
+
+        #{@pastel.green '$ neocities-red upload ./img.jpg /images/'}   Uploads img.jpg to /images/img.jpg
       HERE
       exit
     end
