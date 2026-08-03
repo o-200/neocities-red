@@ -244,7 +244,9 @@ module NeocitiesRed
 
         #{@pastel.dim 'Examples:'}
 
-        #{@pastel.green '$ neocities-red purge -y'}
+        #{@pastel.green '$ neocities-red purge -y'}                Delete all files from your site
+
+        #{@pastel.green '$ neocities-red purge -y --dry-run'}      Show what would be deleted
       HERE
       exit
     end

@@ -21,7 +21,7 @@ module NeocitiesRed
         def stats
           response = @client.info(@subargs[0] || @sitename)
 
-          raise NeocitiesRed::Services::ClientError, response if response[:result] == "error"
+          raise NeocitiesRed::Services::ClientError, response[:message] if response[:result] == "error"
 
           response
         end

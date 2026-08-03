@@ -28,27 +28,30 @@ module NeocitiesRed
           Dir.chdir(root_path) do
             paths = Dir.glob(::File.join("**", "*"), ::File::FNM_DOTMATCH)
 
-            local_paths = paths.reject { |path| path.start_with?(".") }
-            local_files = local_paths.select { |path| ::File.file?(path) }.map do |path|
-              {
-                path: path,
-                sha1_hash: Digest::SHA1.file(path).hexdigest
-              }
-            end
-            server_paths = server_files.map { |n| n[:path] }
-
-            server_file_map = server_files.to_h do |file|
+            server_file_entries = server_files.reject { |file| file[:is_directory] }
+            server_paths = server_file_entries.map { |file| file[:path] }
+            server_file_map = server_file_entries.to_h do |file|
               [file[:path], file[:sha1_hash]]
             end
+
+            local_paths = paths
 
             if @ignore_dotfiles
               server_paths = server_paths.reject { |path| path.start_with?(".") }
               local_paths = local_paths.reject { |path| path.start_with?(".") }
             end
 
+            local_files = local_paths.select { |path| ::File.file?(path) }.map do |path|
+              {
+                path: path,
+                sha1_hash: Digest::SHA1.file(path).hexdigest
+              }
+            end
+
             if @exclude.any?
-              server_paths -= @exclude
-              local_paths -= @exclude
+              normalized_exclude = @exclude.map { |path| Pathname.new(path).cleanpath.to_s }
+              server_paths -= normalized_exclude
+              local_paths -= normalized_exclude
             end
 
             removed_paths = server_paths - local_paths

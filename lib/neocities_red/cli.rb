@@ -151,10 +151,12 @@ module NeocitiesRed
 
     desc "purge", "Delete everything from your site (development only)"
     method_option :yes, aliases: "-y", type: :boolean, default: false
+    method_option :dry_run, type: :boolean, default: false
     def purge
       return display_help_for("purge") unless options[:yes]
 
       client = ensure_client!
+      display.display_dry_run_notice if options[:dry_run]
       resp = client.list
       deleted_dirs = []
       resp[:files].sort_by { |f| f[:is_directory] ? 0 : 1 }.each do |file|
@@ -293,9 +295,14 @@ module NeocitiesRed
         }
 
         FileUtils.mkdir_p(Pathname(app_config_path).dirname)
-        File.write(app_config_path, conf.to_json)
+        persist_config(conf)
         display.display_api_key_saved(@sitename, app_config_path)
         @client = NeocitiesRed::Client.new(api_key: @api_key)
+      end
+
+      def persist_config(conf)
+        File.write(app_config_path, conf.to_json)
+        FileUtils.chmod(0o600, app_config_path)
       end
 
       def build_diff_exclusions(base_path, excluded_entries)
