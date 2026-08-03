@@ -11,9 +11,7 @@ require "json"
 require "pathname"
 require "uri"
 require "digest"
-require "pastel"
 require "date"
-require "whirly"
 
 require "faraday"
 require "faraday/retry"
@@ -27,7 +25,6 @@ module NeocitiesRed
     def initialize(opts = {})
       @uri = URI.parse API_URI
       @opts = opts
-      @pastel = Pastel.new eachline: "\n"
       @conn = Faraday.new(@uri) do |conn|
         conn.options.timeout = 30
         conn.options.open_timeout = 10
@@ -61,75 +58,6 @@ module NeocitiesRed
 
     def list(path = nil)
       get "list", path: path
-    end
-
-    # TODO: refactor
-    def pull(sitename, last_pull_time = nil, last_pull_loc = nil, quiet: true)
-      site_info = info(sitename)
-
-      raise ArgumentError, site_info[:message] if site_info[:result] == "error"
-
-      info_data = site_info[:info]
-
-      domain =
-        if info_data[:domain].to_s.empty?
-          "https://#{sitename}.neocities.org/"
-        else
-          "https://#{info_data[:domain]}/"
-        end
-
-      # start stats
-      success_loaded = 0
-      start_time = Time.now
-      curr_dir = Dir.pwd
-
-      # get list of files
-      resp = list
-
-      raise ArgumentError, resp[:message] if resp[:result] == "error"
-
-      # fetch each file
-      uri_parser = URI::Parser.new
-      resp[:files].each do |file|
-        if file[:is_directory]
-          FileUtils.mkdir_p file[:path].to_s
-        else
-          print @pastel.bold("Pulling #{file[:path]} ... ") unless quiet
-
-          if last_pull_time &&
-             last_pull_loc &&
-             Time.parse(file[:updated_at]) <= Time.parse(last_pull_time) &&
-             last_pull_loc == curr_dir &&
-             File.exist?(file[:path]) # case when user deletes file
-
-            # case when file hasn't been updated since last
-            print "#{@pastel.yellow.bold 'NO NEW UPDATES'}\n" unless quiet
-
-            next
-          end
-
-          pathtotry = uri_parser.escape(domain + file[:path])
-          fileconts = @conn.get pathtotry
-
-          if fileconts.status == 200
-            print "#{@pastel.green.bold 'SUCCESS'}\n" unless quiet
-            success_loaded += 1
-
-            File.write(file[:path].to_s, fileconts.body)
-          elsif !quiet
-            print "#{@pastel.red.bold 'FAIL'}\n"
-          end
-        end
-      end
-
-      # calculate time command took
-      total_time = Time.now - start_time
-
-      # stop the spinner, if there is one
-      Whirly.stop if quiet
-
-      # display stats
-      puts @pastel.green "\nSuccessfully fetched #{success_loaded} files in #{total_time.round(2)} seconds"
     end
 
     def key
@@ -188,6 +116,10 @@ module NeocitiesRed
       resp = @conn.get(uri)
 
       JSON.parse resp.body, symbolize_names: true
+    end
+
+    def download(url)
+      @conn.get(url)
     end
 
     def post(path, args = {})

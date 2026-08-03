@@ -27,7 +27,7 @@ module NeocitiesRed
       return display_help_for("diff") if help_requested?(options[:help], path)
 
       client = ensure_client!
-      exclude = build_diff_exclusions(path, Array(options[:exclude]))
+      exclude = Services::Common::Exclusions.build(Array(options[:exclude]), base_path: path)
 
       added, modified, removed = Services::Site::Differencer.new(
         client,
@@ -46,7 +46,7 @@ module NeocitiesRed
       return display_help_for("delete") if paths.empty? || help_requested?(options[:help], paths)
 
       client = ensure_client!
-      paths.each { |path| Services::File::Remover.new(client, path).remove }
+      paths.each { |path| Services::File::Remover.new(client, path, display: display).remove }
     end
 
     desc "logout", "Remove the site api key from the config"
@@ -83,7 +83,9 @@ module NeocitiesRed
 
       client = ensure_client!
       path = nil if options[:all]
-      display.say Services::File::List.new(client, path, options[:detail]).show
+      display.say Services::File::List.new(client, path, options[:detail], display: display).show
+    rescue NeocitiesRed::APIError => e
+      display.display_response(e)
     end
 
     desc "push PATH", "Recursively upload a local directory to your Neocities site"
@@ -125,9 +127,9 @@ module NeocitiesRed
       client = ensure_client!
       dest = remote_path || File.basename(local_path)
       if File.file?(local_path)
-        Services::File::Uploader.new(client, local_path, dest).upload
+        Services::File::Uploader.new(client, local_path, dest, display: display).upload
       elsif File.directory?(local_path)
-        folder_uploader = Services::File::FolderUploader.new(client, local_path, dest)
+        folder_uploader = Services::File::FolderUploader.new(client, local_path, dest, display: display)
         files_list = folder_uploader.files
         folder_uploader.upload(files_list)
       end
@@ -145,8 +147,10 @@ module NeocitiesRed
       last_pull_time = data.dig("LAST_PULL", "time")
       last_pull_loc = data.dig("LAST_PULL", "loc")
 
-      Services::Site::Exporter.new(client, @sitename, data, app_config_path)
+      Services::Site::Exporter.new(client, @sitename, data, app_config_path, display: display)
                               .export(quiet: options[:quiet], last_pull_time: last_pull_time, last_pull_loc: last_pull_loc)
+    rescue StandardError => e
+      display.display_response(e)
     end
 
     desc "purge", "Delete everything from your site (development only)"
@@ -303,31 +307,6 @@ module NeocitiesRed
       def persist_config(conf)
         File.write(app_config_path, conf.to_json)
         FileUtils.chmod(0o600, app_config_path)
-      end
-
-      def build_diff_exclusions(base_path, excluded_entries)
-        base = Pathname.new(base_path).expand_path
-        excludes = []
-
-        excluded_entries.each do |entry|
-          target = Pathname.new(entry).expand_path
-          next unless target.exist?
-
-          filepath = target.relative_path_from(base).to_s
-
-          if File.file?(target)
-            excludes << filepath
-          elsif File.directory?(target)
-            excludes.concat(
-              Dir.glob(File.join(target, "**", "*"), File::FNM_DOTMATCH).map do |path|
-                Pathname.new(path).expand_path.relative_path_from(base).to_s
-              end
-            )
-            excludes << filepath
-          end
-        end
-
-        excludes
       end
 
       def help_requested_for?(value)

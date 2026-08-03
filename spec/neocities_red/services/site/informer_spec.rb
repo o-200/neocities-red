@@ -54,9 +54,9 @@ RSpec.describe NeocitiesRed::Services::Site::Informer do
         allow(client).to receive(:info).and_return(error_response)
       end
 
-      it "raises ClientError with the message" do
+      it "raises APIError with the message" do
         expect { profile_info.stats }.to raise_error(
-          NeocitiesRed::Services::ClientError,
+          NeocitiesRed::APIError,
           /could not find site nonexistent/
         )
       end

@@ -89,8 +89,52 @@ module NeocitiesRed
       say "Not pushing .gitignore entries (--no-gitignore to disable)"
     end
 
+    def display_upload_progress(path, remote_path)
+      @io.print @pastel.bold("Uploading #{path} to #{remote_path} ... ")
+    end
+
+    def display_upload_success
+      @io.print "#{@pastel.green.bold('SUCCESS')}\n"
+    end
+
+    def display_upload_exists
+      @io.print "#{@pastel.yellow.bold('EXISTS')}\n"
+    end
+
+    def display_skip_directory(path)
+      say @pastel.bold("#{path} is a directory, skipping")
+    end
+
+    def display_skip_file(path)
+      say @pastel.bold("#{path} is not a directory, skipping")
+    end
+
     def display_upload_complete
       say "All files uploaded."
+    end
+
+    def display_list_table(table)
+      say table
+    end
+
+    def display_pull_progress(path)
+      @io.print @pastel.bold("Pulling #{path} ... ")
+    end
+
+    def display_pull_no_updates
+      @io.print "#{@pastel.yellow.bold('NO NEW UPDATES')}\n"
+    end
+
+    def display_pull_success
+      @io.print "#{@pastel.green.bold('SUCCESS')}\n"
+    end
+
+    def display_pull_failure
+      @io.print "#{@pastel.red.bold('FAIL')}\n"
+    end
+
+    def display_pull_stats(success_loaded, total_time)
+      say @pastel.green "\nSuccessfully fetched #{success_loaded} files in #{total_time.round(2)} seconds"
     end
 
     def display_pizza_help_and_exit

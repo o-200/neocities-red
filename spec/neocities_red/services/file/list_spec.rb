@@ -7,7 +7,8 @@ RSpec.describe NeocitiesRed::Services::File::List do
   let(:client) { instance_double(NeocitiesRed::Client) }
   let(:path) { nil }
   let(:detail) { false }
-  let(:file_list) { described_class.new(client, path, detail) }
+  let(:display) { instance_double(NeocitiesRed::CliDisplay, display_list_table: nil) }
+  let(:file_list) { described_class.new(client, path, detail, display: display) }
 
   describe "#list" do
     context "when successful" do
@@ -58,11 +59,10 @@ RSpec.describe NeocitiesRed::Services::File::List do
 
       before do
         allow(client).to receive(:list).and_return(error_response)
-        allow($stdout).to receive(:puts)
       end
 
-      it "displays the error and exits" do
-        expect { file_list.list }.to raise_error(SystemExit)
+      it "raises APIError with the message" do
+        expect { file_list.list }.to raise_error(NeocitiesRed::APIError, /Invalid path/)
       end
     end
   end
@@ -81,7 +81,6 @@ RSpec.describe NeocitiesRed::Services::File::List do
 
       before do
         allow(client).to receive(:list).with(path).and_return(files_response)
-        allow($stdout).to receive(:puts)
       end
 
       it "returns an array of files" do
@@ -119,7 +118,6 @@ RSpec.describe NeocitiesRed::Services::File::List do
         allow(pastel).to receive_messages(blue: pastel, green: pastel)
         allow(TTY::Table).to receive(:new).and_return(table)
         allow(table).to receive(:to_s).and_return("table output")
-        allow($stdout).to receive(:puts)
       end
 
       it "returns files with detailed information" do
@@ -142,6 +140,12 @@ RSpec.describe NeocitiesRed::Services::File::List do
 
         expect(pastel).to have_received(:green).at_least(:once)
       end
+
+      it "renders the table through the display" do
+        file_list.show
+
+        expect(display).to have_received(:display_list_table).with(table)
+      end
     end
 
     context "when API returns an error" do
@@ -149,11 +153,10 @@ RSpec.describe NeocitiesRed::Services::File::List do
 
       before do
         allow(client).to receive(:list).and_return(error_response)
-        allow($stdout).to receive(:puts)
       end
 
-      it "displays the error and exits" do
-        expect { file_list.show }.to raise_error(SystemExit)
+      it "raises APIError with the message" do
+        expect { file_list.show }.to raise_error(NeocitiesRed::APIError, /Path not found/)
       end
     end
   end
@@ -166,7 +169,7 @@ RSpec.describe NeocitiesRed::Services::File::List do
     end
 
     it "handles nil detail as false" do
-      file_list_nil_detail = described_class.new(client, path, nil)
+      file_list_nil_detail = described_class.new(client, path, nil, display: display)
       expect(file_list_nil_detail.instance_variable_get(:@detail)).to be(false)
     end
 

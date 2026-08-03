@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require "pathname"
-require "pastel"
 
 module NeocitiesRed
   module Services
@@ -11,20 +10,20 @@ module NeocitiesRed
       MAX_THREADS = 5
 
       class FolderUploader
-        def initialize(client, filepath, remote_path)
+        def initialize(client, filepath, remote_path, display: NeocitiesRed::CliDisplay.new)
           @client = client
           @filepath = filepath
           @remote_path = remote_path
-          @pastel = Pastel.new(eachline: "\n")
+          @display = display
         end
 
         def files
           path = Pathname.new(::File.expand_path(@filepath))
 
-          raise FileIsNotExists, "#{path} does not exist locally." unless path.exist?
+          raise NeocitiesRed::FileNotFoundError, "#{path} does not exist locally." unless path.exist?
 
           if path.file?
-            puts @pastel.bold("#{path} is not a directory, skipping")
+            @display.display_skip_file(path)
             return
           end
 
@@ -37,27 +36,14 @@ module NeocitiesRed
         def upload(files_list, threads = MAX_THREADS)
           base = ::File.expand_path(@filepath)
 
-          queue = Queue.new
-          files_list.each { |file| queue << file }
+          worker_pool = Services::Common::WorkerPool.new(threads) do |file|
+            local_path  = ::File.join(base, file)
+            remote_path = ::File.join(@remote_path, file)
 
-          workers = Array.new(threads) do
-            Thread.new do
-              loop do
-                begin
-                  file = queue.pop(true)
-                rescue ThreadError
-                  break
-                end
-
-                local_path  = ::File.join(base, file)
-                remote_path = ::File.join(@remote_path, file)
-
-                Uploader.new(@client, local_path, remote_path).upload
-              end
-            end
+            Uploader.new(@client, local_path, remote_path, display: @display).upload
           end
 
-          workers.each(&:join)
+          worker_pool.process(files_list)
         end
       end
     end

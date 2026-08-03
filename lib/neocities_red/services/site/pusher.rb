@@ -10,7 +10,6 @@ module NeocitiesRed
         # warning - the big quantity of working threads could be considered like-a DDOS.
         # Your ip-address could get banned on neocities for a few days.
         MAX_THREADS = 5
-
         def initialize(client, display, root:, no_gitignore:, ignore_dotfiles:, exclude:, dry_run:, prune:, optimized:)
           @client = client
           @display = display
@@ -30,7 +29,7 @@ module NeocitiesRed
           @display.display_dry_run_notice if @dry_run
           prune_remote_files if @prune
 
-          excluded_files = build_push_exclusions(@exclude)
+          excluded_files = Services::Common::Exclusions.build(@exclude)
 
           Dir.chdir(root_path) do
             paths = Dir.glob(::File.join("**", "*"), ::File::FNM_DOTMATCH)
@@ -49,22 +48,6 @@ module NeocitiesRed
         def validate_root_path!(root_path)
           raise ArgumentError, "path #{root_path} does not exist" unless root_path.exist?
           raise ArgumentError, "provided path is not a directory" unless root_path.directory?
-        end
-
-        def build_push_exclusions(excluded_entries)
-          excluded_files = []
-
-          excluded_entries.each do |entry|
-            filepath = Pathname.new(entry).cleanpath.to_s
-
-            if ::File.file?(filepath)
-              excluded_files << filepath
-            elsif ::File.directory?(filepath)
-              excluded_files.concat(Dir.glob(::File.join(filepath, "**", "*"), ::File::FNM_DOTMATCH).push(filepath))
-            end
-          end
-
-          excluded_files
         end
 
         def apply_gitignore(paths)
@@ -98,27 +81,13 @@ module NeocitiesRed
         end
 
         def upload_files(paths)
-          task_queue = Queue.new
-          paths.each { |path| task_queue.push(path) }
+          worker_pool = Services::Common::WorkerPool.new(MAX_THREADS) do |path|
+            next if path.directory?
 
-          threads = []
-          MAX_THREADS.times do
-            threads << Thread.new do
-              until task_queue.empty?
-                path = begin
-                  task_queue.pop(true)
-                rescue StandardError
-                  nil
-                end
-
-                next if path.nil? || path.directory?
-
-                Services::File::Uploader.new(@client, path, path).upload
-              end
-            end
+            Services::File::Uploader.new(@client, path, path, display: @display).upload
           end
 
-          threads.each(&:join)
+          worker_pool.process(paths)
           @display.display_upload_complete
         end
 

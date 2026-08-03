@@ -1,13 +1,22 @@
 # frozen_string_literal: true
 
-require "fileutils"
 require "spec_helper"
 
 RSpec.describe NeocitiesRed::Services::File::Uploader do
   let(:client) { instance_double(NeocitiesRed::Client) }
   let(:filepath) { "/path/to/file.txt" }
   let(:remote_path) { "file.txt" }
-  let(:uploader) { described_class.new(client, filepath, remote_path) }
+  let(:display) do
+    instance_double(
+      NeocitiesRed::CliDisplay,
+      display_skip_directory: nil,
+      display_upload_progress: nil,
+      display_upload_success: nil,
+      display_upload_exists: nil,
+      display_response: nil
+    )
+  end
+  let(:uploader) { described_class.new(client, filepath, remote_path, display: display) }
 
   describe "#upload" do
     context "when the file does not exist" do
@@ -15,9 +24,9 @@ RSpec.describe NeocitiesRed::Services::File::Uploader do
         allow(Pathname).to receive(:new).with(filepath).and_return(instance_double(Pathname, exist?: false))
       end
 
-      it "raises FileIsNotExists error" do
+      it "raises FileNotFoundError" do
         expect { uploader.upload }.to raise_error(
-          NeocitiesRed::Services::File::FileIsNotExists,
+          NeocitiesRed::FileNotFoundError,
           /does not exist locally/
         )
       end
@@ -29,13 +38,12 @@ RSpec.describe NeocitiesRed::Services::File::Uploader do
       before do
         allow(Pathname).to receive(:new).with(filepath).and_return(path_double)
         allow(client).to receive(:upload)
-        allow($stdout).to receive(:puts)
       end
 
-      it "prints a message and returns without uploading" do
+      it "displays a skip message and returns without uploading" do
         uploader.upload
 
-        expect($stdout).to have_received(:puts).with(match(/#{Regexp.escape(filepath)} is a directory, skipping/))
+        expect(display).to have_received(:display_skip_directory).with(path_double)
         expect(client).not_to have_received(:upload)
       end
     end
@@ -46,7 +54,6 @@ RSpec.describe NeocitiesRed::Services::File::Uploader do
 
       before do
         allow(Pathname).to receive(:new).with(filepath).and_return(path_double)
-        allow($stdout).to receive(:puts)
       end
 
       context "when upload is successful" do
@@ -60,10 +67,11 @@ RSpec.describe NeocitiesRed::Services::File::Uploader do
           expect(client).to have_received(:upload).with(path_double, remote_path)
         end
 
-        it "prints success message" do
+        it "displays progress and success" do
           uploader.upload
 
-          expect($stdout).to have_received(:puts).with(/SUCCESS/)
+          expect(display).to have_received(:display_upload_progress).with(path_double, remote_path)
+          expect(display).to have_received(:display_upload_success)
         end
 
         it "returns the success response" do
@@ -86,10 +94,10 @@ RSpec.describe NeocitiesRed::Services::File::Uploader do
           allow(client).to receive(:upload).with(path_double, remote_path).and_return(exists_response)
         end
 
-        it "prints exists message" do
+        it "displays exists message" do
           uploader.upload
 
-          expect($stdout).to have_received(:puts).with(/EXISTS/)
+          expect(display).to have_received(:display_upload_exists)
         end
 
         it "returns the error response" do
@@ -108,12 +116,10 @@ RSpec.describe NeocitiesRed::Services::File::Uploader do
           allow(client).to receive(:upload).with(path_double, remote_path).and_return(error_response)
         end
 
-        it "prints error message" do
+        it "displays the error response" do
           uploader.upload
 
-          expect($stdout).to have_received(:puts).with(
-            hash_including(result: "error", error_type: "upload_failed", message: "Upload failed")
-          )
+          expect(display).to have_received(:display_response).with(error_response)
         end
 
         it "returns the error response" do
@@ -127,13 +133,12 @@ RSpec.describe NeocitiesRed::Services::File::Uploader do
     context "with custom remote path" do
       let(:custom_remote_path) { "custom/path/file.txt" }
       let(:path_double) { instance_double(Pathname, exist?: true, directory?: false, to_s: filepath) }
-      let(:custom_uploader) { described_class.new(client, filepath, custom_remote_path) }
+      let(:custom_uploader) { described_class.new(client, filepath, custom_remote_path, display: display) }
       let(:success_response) { { result: "success", message: "File uploaded successfully" } }
 
       before do
         allow(Pathname).to receive(:new).with(filepath).and_return(path_double)
         allow(client).to receive(:upload).with(path_double, custom_remote_path).and_return(success_response)
-        allow($stdout).to receive(:puts)
       end
 
       it "uses the custom remote path" do
@@ -151,8 +156,8 @@ RSpec.describe NeocitiesRed::Services::File::Uploader do
       expect(uploader.instance_variable_get(:@remote_path)).to eq(remote_path)
     end
 
-    it "creates a Pastel instance" do
-      expect(uploader.instance_variable_get(:@pastel)).to be_a(Pastel::Delegator)
+    it "stores the display" do
+      expect(uploader.instance_variable_get(:@display)).to eq(display)
     end
   end
 end

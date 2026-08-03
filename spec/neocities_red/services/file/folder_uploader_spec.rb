@@ -6,6 +6,7 @@ require "fileutils"
 RSpec.describe NeocitiesRed::Services::File::FolderUploader do
   let(:client) { instance_double(NeocitiesRed::Client) }
   let(:remote_path) { "ext/" }
+  let(:display) { instance_double(NeocitiesRed::CliDisplay, display_skip_file: nil) }
 
   let(:spec_root) { File.expand_path("..", __dir__) } # => ./spec
   let(:tmp_root)  { File.join(spec_root, "tmp", "folder_uploader_spec") }
@@ -26,9 +27,9 @@ RSpec.describe NeocitiesRed::Services::File::FolderUploader do
   end
 
   describe "#files" do
-    it "raises FileIsNotExists when the path does not exist" do
-      uploader = described_class.new(client, File.join(tmp_root, "nope"), remote_path)
-      expect { uploader.files }.to raise_error(NeocitiesRed::Services::File::FileIsNotExists)
+    it "raises FileNotFoundError when the path does not exist" do
+      uploader = described_class.new(client, File.join(tmp_root, "nope"), remote_path, display: display)
+      expect { uploader.files }.to raise_error(NeocitiesRed::FileNotFoundError)
     end
 
     it "returns all files under the directory as relative paths, including dotfiles, excluding directories" do
@@ -40,7 +41,7 @@ RSpec.describe NeocitiesRed::Services::File::FolderUploader do
       FileUtils.mkdir_p(File.join(tmp_root, "ext/empty_dir"))
       FileUtils.mkdir_p(File.join(tmp_root, "ext/.hiddendir"))
 
-      uploader = described_class.new(client, File.join(tmp_root, "ext"), remote_path)
+      uploader = described_class.new(client, File.join(tmp_root, "ext"), remote_path, display: display)
       expect(uploader.files).to contain_exactly("a.txt", "sub/b.txt", ".env", "sub/.keep")
     end
 
@@ -49,16 +50,17 @@ RSpec.describe NeocitiesRed::Services::File::FolderUploader do
       write_file("tmp_ext/sub/nested.rb", content: "puts :ok")
 
       Dir.chdir(tmp_root) do
-        uploader = described_class.new(client, "./tmp_ext/", remote_path)
+        uploader = described_class.new(client, "./tmp_ext/", remote_path, display: display)
         expect(uploader.files).to contain_exactly("root.rb", "sub/nested.rb")
       end
     end
 
     it "returns nil when filepath is a file (not a directory)" do
       file_path = write_file("not_a_dir.txt", content: "hello")
-      uploader = described_class.new(client, file_path, remote_path)
+      uploader = described_class.new(client, file_path, remote_path, display: display)
 
       expect(uploader.files).to be_nil
+      expect(display).to have_received(:display_skip_file)
     end
   end
 end

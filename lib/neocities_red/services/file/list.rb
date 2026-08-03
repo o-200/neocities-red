@@ -8,56 +8,50 @@ module NeocitiesRed
   module Services
     module File
       class List
-        def initialize(client, path, detail)
+        def initialize(client, path, detail, display: NeocitiesRed::CliDisplay.new)
           @client = client
           @path = path
           @detail = detail || false
+          @display = display
           @pastel = Pastel.new(eachline: "\n")
         end
 
         def list
-          resp = @client.list(@path)
-
-          display_error_and_exit(resp) if resp[:result] == "error"
-
-          resp[:files]
+          files_from_response
         end
 
         def show
-          resp = @client.list(@path)
+          files = files_from_response
 
-          display_error_and_exit(resp) if resp[:result] == "error"
+          return files unless @detail
 
-          if @detail
-            out = [
-              [@pastel.bold("Path"), @pastel.bold("Size"), @pastel.bold("sha1_Hash"),
-               @pastel.bold("Updated")]
-            ]
+          out = [
+            [@pastel.bold("Path"), @pastel.bold("Size"), @pastel.bold("sha1_Hash"),
+             @pastel.bold("Updated")]
+          ]
 
-            resp[:files].each do |file|
-              out.push([
-                         @pastel.send(file[:is_directory] ? :blue : :green).bold(file[:path]),
-                         file[:size] || "",
-                         file[:sha1_hash],
-                         Time.parse(file[:updated_at]).localtime
-                       ])
-            end
-
-            puts TTY::Table.new(out)
+          files.each do |file|
+            out.push([
+                       @pastel.send(file[:is_directory] ? :blue : :green).bold(file[:path]),
+                       file[:size] || "",
+                       file[:sha1_hash],
+                       Time.parse(file[:updated_at]).localtime
+                     ])
           end
 
-          resp[:files].map do |file|
-            @pastel.send(file[:is_directory] ? :blue : :green).bold(file[:path])
-          end
+          @display.display_list_table(TTY::Table.new(out))
 
-          resp[:files]
+          files
         end
 
         private
 
-        def display_error_and_exit(resp)
-          puts(resp[:message] || resp[:error_type] || resp.inspect)
-          exit
+        def files_from_response
+          resp = @client.list(@path)
+
+          raise NeocitiesRed::APIError, resp[:message] || resp[:error_type] || resp.inspect if resp[:result] == "error"
+
+          resp[:files]
         end
       end
     end

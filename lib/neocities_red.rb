@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require File.join(File.dirname(__FILE__), "neocities_red", "version")
+require File.join(File.dirname(__FILE__), "neocities_red", "errors")
 require File.join(File.dirname(__FILE__), "neocities_red", "client")
 require File.join(File.dirname(__FILE__), "neocities_red", "cli_display")
 require File.join(File.dirname(__FILE__), "neocities_red", "cli")
@@ -14,4 +15,6 @@ require File.join(File.dirname(__FILE__), "neocities_red", "services", "site", "
 require File.join(File.dirname(__FILE__), "neocities_red", "services", "site", "informer")
 require File.join(File.dirname(__FILE__), "neocities_red", "services", "site", "exporter")
 require File.join(File.dirname(__FILE__), "neocities_red", "services", "site", "pusher")
+require File.join(File.dirname(__FILE__), "neocities_red", "services", "common", "exclusions")
+require File.join(File.dirname(__FILE__), "neocities_red", "services", "common", "worker_pool")
 require File.join(File.dirname(__FILE__), "neocities_red", "services", "common", "pizza")

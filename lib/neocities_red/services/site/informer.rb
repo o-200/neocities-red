@@ -5,8 +5,6 @@ require "pastel"
 
 module NeocitiesRed
   module Services
-    class ClientError < StandardError; end
-
     module Site
       class Informer
         attr_accessor :client
@@ -21,7 +19,7 @@ module NeocitiesRed
         def stats
           response = @client.info(@subargs[0] || @sitename)
 
-          raise NeocitiesRed::Services::ClientError, response[:message] if response[:result] == "error"
+          raise NeocitiesRed::APIError, response[:message] if response[:result] == "error"
 
           response
         end

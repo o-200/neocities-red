@@ -1,30 +1,26 @@
 # frozen_string_literal: true
 
-require "pastel"
-
 module NeocitiesRed
   module Services
     module File
       class Remover
         attr_accessor :client, :filepath
 
-        def initialize(client, filepath)
+        def initialize(client, filepath, display: NeocitiesRed::CliDisplay.new)
           @client = client
           @filepath = filepath
-          @pastel = Pastel.new(eachline: "\n")
+          @display = display
         end
 
         def remove
-          puts @pastel.bold("Deleting #{filepath} ...")
+          @display.display_delete_progress(filepath)
 
           response = @client.delete(filepath)
 
-          puts @pastel.bold(response[:message]) if response[:result] == "error"
-
-          if response[:result] == "error" && response[:error_type] == "file_exists"
-            print @pastel.yellow.bold("EXISTS")
-          elsif response[:result] == "success"
-            print @pastel.green.bold("SUCCESS")
+          if response[:result] == "success"
+            @display.display_delete_success
+          else
+            @display.display_delete_error(response)
           end
 
           response
