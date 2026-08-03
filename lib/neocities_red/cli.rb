@@ -326,7 +326,7 @@ module NeocitiesRed
       def help_requested_for?(value)
         case value
         when Array
-          value.any? { |item| ["-h", "--help", "help"].include?(item) }
+          value.intersect?(["-h", "--help", "help"])
         else
           ["-h", "--help", "help"].include?(value)
         end
