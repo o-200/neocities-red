@@ -38,7 +38,7 @@ Gem::Specification.new do |spec|
   spec.extensions    = ["ext/mkrf_conf.rb"]
   spec.required_ruby_version = ">= 3.4.0"
 
-  spec.add_dependency "faraday", "~> 2.3", ">= 2.14.0"
+  spec.add_dependency "faraday", "~> 2.14.3"
   spec.add_dependency "faraday-follow_redirects"
   spec.add_dependency "faraday-multipart"
   spec.add_dependency "faraday-retry"
