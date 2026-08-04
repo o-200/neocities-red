@@ -136,6 +136,12 @@ Current service namespaces:
 
 ---
 
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for release history.
+
+---
+
 ## Contributing
 
 see CONTRIBUTING.md
