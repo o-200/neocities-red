@@ -4,8 +4,18 @@ require "pastel"
 
 module NeocitiesRed
   module Services
+    # Shared service utilities used across file and site operations.
     module Common
+      # Easter egg — returns a random humorous excuse for why pizza
+      # is unavailable.
+      #
+      # Invoked via the +neocities-red pizza+ CLI command.
+      #
+      # @example
+      #   excuse = Pizza.new.make_order
+      #   puts excuse
       class Pizza
+        # @return [Array<String>] pool of humorous pizza excuses
         EXCUSES = [
           "Sorry, we're fresh out of pineapple today.",
           "All the toppings just went rogue and are currently answering to no god.",
@@ -24,12 +34,12 @@ module NeocitiesRed
           <<~TEXT
             WAR AND PEACE, BY LEO TOLSTOY, BOOK ONE: 1805, CHAPTER I
 
-            “Well, Prince, so Genoa and Lucca are now just family estates of the Buonapartes.
-            But I warn you, if you don’t tell me that this means war, if you still try to defend
+            "Well, Prince, so Genoa and Lucca are now just family estates of the Buonapartes.
+            But I warn you, if you don't tell me that this means war, if you still try to defend
             the infamies and horrors perpetrated by that Antichrist—I really believe he is
             Antichrist—I will have nothing more to do with you and you are no longer my friend,
-            no longer my ‘faithful slave,’ as you call yourself! But how do you do? I see I have
-            frightened you—sit down and tell me all the news.”
+            no longer my 'faithful slave,' as you call yourself! But how do you do? I see I have
+            frightened you—sit down and tell me all the news."
 
             It was in July, 1805, and the speaker was the well-known Anna Pávlovna Schérer,
             maid of honor and favorite of the Empress Márya Fëdorovna. With these words she
@@ -42,11 +52,11 @@ module NeocitiesRed
             All her invitations without exception, written in French, and delivered by a
             scarlet-liveried footman that morning, ran as follows:
 
-            “If you have nothing better to do, Count (or Prince), and if the prospect of
+            "If you have nothing better to do, Count (or Prince), and if the prospect of
             spending an evening with a poor invalid is not too terrible, I shall be very
-            charmed to see you tonight between 7 and 10—Annette Schérer.”
+            charmed to see you tonight between 7 and 10—Annette Schérer."
 
-            “Heavens! what a virulent attack!” replied the prince, not in the least disconcerted
+            "Heavens! what a virulent attack!" replied the prince, not in the least disconcerted
             by this reception.
 
             He had just entered, wearing an embroidered court uniform, knee breeches, and
@@ -59,32 +69,32 @@ module NeocitiesRed
             He went up to Anna Pávlovna, kissed her hand, presenting to her his bald, scented,
             and shining head, and complacently seated himself on the sofa.
 
-            “First of all, dear friend, tell me how you are. Set your friend’s mind at rest,”
+            "First of all, dear friend, tell me how you are. Set your friend's mind at rest,"
             said he without altering his tone, beneath the politeness and affected sympathy of
             which indifference and even irony could be discerned.
 
-            “Can one be well while suffering morally? Can one be calm in times like these if
-            one has any feeling?” said Anna Pávlovna. “You are staying the whole evening, I hope?”
+            "Can one be well while suffering morally? Can one be calm in times like these if
+            one has any feeling?" said Anna Pávlovna. "You are staying the whole evening, I hope?"
 
-            “And the fete at the English ambassador’s? Today is Wednesday. I must put in an
-            appearance there,” said the prince. “My daughter is coming for me to take me there.”
+            "And the fete at the English ambassador's? Today is Wednesday. I must put in an
+            appearance there," said the prince. "My daughter is coming for me to take me there."
 
-            “I thought today’s fete had been canceled. I confess all these festivities and
-            fireworks are becoming wearisome.”
+            "I thought today's fete had been canceled. I confess all these festivities and
+            fireworks are becoming wearisome."
 
-            “If they had known that you wished it, the entertainment would have been put off,”
+            "If they had known that you wished it, the entertainment would have been put off,"
             said the prince, who, like a wound-up clock, by force of habit said things he did
             not even wish to be believed.
 
-            “Don’t tease! Well, and what has been decided about Novosíltsev’s dispatch?
-            You know everything.”
+            "Don't tease! Well, and what has been decided about Novosíltsev's dispatch?
+            You know everything."
 
-            “What can one say about it?” replied the prince in a cold, listless tone.
-            “What has been decided? They have decided that Buonaparte has burnt his boats,
-            and I believe that we are ready to burn ours.”
+            "What can one say about it?" replied the prince in a cold, listless tone.
+            "What has been decided? They have decided that Buonaparte has burnt his boats,
+            and I believe that we are ready to burn ours."
 
             Prince Vasíli always spoke languidly, like an actor repeating a stale part.
-            Anna Pávlovna Schérer on the contrary, despite her forty years, overflowed with
+            Anna Pávlovna Schérer on the contrary, despite of her forty years, overflowed with
             animation and impulsiveness.
 
             To be an enthusiast had become her social vocation and, sometimes even when she
@@ -98,6 +108,9 @@ module NeocitiesRed
           TEXT
         ].freeze
 
+        # Returns a random pizza excuse.
+        #
+        # @return [String] a humorous excuse rendered in bright red via Pastel
         def make_order
           Pastel.new(enabled: true).bright_red(EXCUSES.sample)
         end

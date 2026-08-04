@@ -5,11 +5,29 @@ require "pathname"
 module NeocitiesRed
   module Services
     module File
-      # warning - the big quantity of working threads could be considered like-a DDOS.
-      # Your ip-address could get banned for a few days.
+      # Maximum number of concurrent upload threads.
+      #
+      # Warning: a high thread count may be flagged as DDOS-like traffic
+      # by Neocities, potentially resulting in a temporary IP ban.
       MAX_THREADS = 5
 
+      # Uploads all files in a local directory to the remote site in parallel.
+      #
+      # Uses a {Services::Common::WorkerPool} to upload files concurrently
+      # up to {MAX_THREADS} threads. Each file is uploaded via {Uploader}.
+      #
+      # @example
+      #   folder = NeocitiesRed::Services::File::FolderUploader.new(client, "./dist", "assets", display: display)
+      #   files = folder.files
+      #   folder.upload(files)
+      #
+      # @see NeocitiesRed::Services::File::Uploader Individual file upload
+      # @see NeocitiesRed::Services::Common::WorkerPool Thread pool
       class FolderUploader
+        # @param client [NeocitiesRed::Client] authenticated API client
+        # @param filepath [String] local directory path to upload
+        # @param remote_path [String] remote destination directory
+        # @param display [NeocitiesRed::CliDisplay] output helper
         def initialize(client, filepath, remote_path, display: NeocitiesRed::CliDisplay.new)
           @client = client
           @filepath = filepath
@@ -17,6 +35,11 @@ module NeocitiesRed
           @display = display
         end
 
+        # Recursively lists all files in the local directory.
+        #
+        # @return [Array<String>] relative file paths within the directory
+        # @raise [NeocitiesRed::FileNotFoundError] if the directory does not exist
+        # @return [nil] if the path is a file (not a directory)
         def files
           path = Pathname.new(::File.expand_path(@filepath))
 
@@ -33,6 +56,11 @@ module NeocitiesRed
           end
         end
 
+        # Uploads all files in the list concurrently.
+        #
+        # @param files_list [Array<String>] relative file paths to upload
+        # @param threads [Integer] maximum concurrent upload threads (default: {MAX_THREADS})
+        # @return [void]
         def upload(files_list, threads = MAX_THREADS)
           base = ::File.expand_path(@filepath)
 

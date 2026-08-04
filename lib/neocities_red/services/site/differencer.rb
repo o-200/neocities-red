@@ -6,7 +6,29 @@ require "tty/table"
 module NeocitiesRed
   module Services
     module Site
+      # Compares local files against the remote Neocities site.
+      #
+      # Identifies three categories of differences:
+      # - **Added** — files present locally but not on the server
+      # - **Modified** — files present in both but with different SHA1 hashes
+      # - **Removed** — files present on the server but not locally
+      #
+      # Results are color-coded: green for added, yellow for modified,
+      # red for removed.
+      #
+      # @example
+      #   differencer = NeocitiesRed::Services::Site::Differencer.new(
+      #     client, path: ".", detail: false, ignore_dotfiles: false, exclude: []
+      #   )
+      #   added, modified, removed = differencer.show
+      #
+      # @see NeocitiesRed::Services::File::List Fetches the remote file list
       class Differencer
+        # @param client [NeocitiesRed::Client] authenticated API client
+        # @param path [String] local directory path to compare (default: ".")
+        # @param detail [Boolean] whether to show detailed output (default: false)
+        # @param ignore_dotfiles [Boolean] when true, ignores files starting with "."
+        # @param exclude [Array<String>] local paths to exclude from comparison
         def initialize(client, path: ".", detail: false, ignore_dotfiles: false, exclude: [])
           @client = client
           @path = path
@@ -16,6 +38,11 @@ module NeocitiesRed
           @pastel = Pastel.new(eachline: "\n")
         end
 
+        # Computes the diff between local and remote files.
+        #
+        # @return [Array(Array<String>, Array<String>, Array<String>)]
+        #   a tuple of +[added, modified, removed]+, where each element
+        #   is an array of color-coded file path strings
         def show
           server_files = Services::File::List.new(@client, nil, @detail).show
 
