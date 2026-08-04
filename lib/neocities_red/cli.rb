@@ -384,7 +384,6 @@ module NeocitiesRed
 
         config = read_config
         @sitename = config && config["SITENAME"]
-        @last_pull = config && config["LAST_PULL"]
 
         @api_key = options[:api_key] || ENV.fetch("NEOCITIES_API_KEY", nil)
         @api_key ||= config && config["API_KEY"]&.strip

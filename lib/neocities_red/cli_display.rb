@@ -112,14 +112,6 @@ module NeocitiesRed
       say "The api key for #{@pastel.bold(sitename)} has been stored in #{@pastel.bold(path)}."
     end
 
-    # Displays an unknown CLI option error.
-    #
-    # @param option [String] the unrecognized option
-    # @return [void]
-    def display_unknown_option(option)
-      say @pastel.red.bold("Unknown option: #{option.inspect}")
-    end
-
     # Displays a logout success message.
     #
     # @return [void]

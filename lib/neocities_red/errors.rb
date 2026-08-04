@@ -6,12 +6,6 @@ module NeocitiesRed
   # @abstract Subclass this for domain-specific errors.
   class Error < StandardError; end
 
-  # Raised when authentication with the Neocities API fails.
-  #
-  # This may occur due to invalid credentials, an expired API key,
-  # or failure to obtain an API key during interactive login.
-  class AuthenticationError < Error; end
-
   # Raised when the Neocities API returns a non-success response.
   #
   # Wraps error messages from the remote API so callers can inspect

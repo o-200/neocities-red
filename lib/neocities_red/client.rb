@@ -125,11 +125,7 @@ module NeocitiesRed
       rpath = remote_path || path.basename
       res = upload_hash(rpath.to_s, Digest::SHA1.file(path.to_s).hexdigest)
 
-      file_exists_remotely = if res[:files]
-                               res[:files][rpath.to_s.to_sym] == true || res[:files][rpath.to_s] == true
-                             else
-                               false
-                             end
+      file_exists_remotely = res[:files] ? res[:files][rpath.to_s.to_sym] == true : false
 
       if file_exists_remotely
         {

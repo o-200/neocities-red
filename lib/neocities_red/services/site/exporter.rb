@@ -30,16 +30,16 @@ module NeocitiesRed
       # @see NeocitiesRed::Client#download Downloads individual files
       class Exporter
         # @return [NeocitiesRed::Client] the authenticated API client
-        attr_accessor :client
+        attr_reader :client
 
         # @return [String] the site name being exported
-        attr_accessor :sitename
+        attr_reader :sitename
 
         # @return [Hash] the current config data (modified in-place with last pull info)
-        attr_accessor :data
+        attr_reader :data
 
         # @return [String] path to the config file for persisting pull metadata
-        attr_accessor :app_config_path
+        attr_reader :app_config_path
 
         # @param client [NeocitiesRed::Client] authenticated API client
         # @param sitename [String] the Neocities site name

@@ -81,12 +81,6 @@ RSpec.describe NeocitiesRed::CliDisplay do
   end
 
   describe "status helpers" do
-    it "prints unknown option" do
-      display.display_unknown_option("--wat")
-
-      expect(text_output).to include('Unknown option: "--wat"')
-    end
-
     it "prints delete progress and success on the same line" do
       display.display_delete_progress("foo.txt")
       display.display_delete_success

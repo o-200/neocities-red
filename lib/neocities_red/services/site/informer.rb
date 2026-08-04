@@ -20,7 +20,7 @@ module NeocitiesRed
       # @see NeocitiesRed::Client#info Underlying API call
       class Informer
         # @return [NeocitiesRed::Client] the authenticated API client
-        attr_accessor :client
+        attr_reader :client
 
         # @param client [NeocitiesRed::Client] authenticated API client
         # @param subargs [Array<String>] CLI subarguments; the first element

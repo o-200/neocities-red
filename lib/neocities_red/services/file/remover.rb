@@ -14,7 +14,7 @@ module NeocitiesRed
       # @see NeocitiesRed::Client#delete Underlying delete API call
       class Remover
         # @return [NeocitiesRed::Client] the authenticated API client
-        attr_accessor :client
+        attr_reader :client
 
         # @return [String] the remote file path to delete
         attr_accessor :filepath

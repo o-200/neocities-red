@@ -44,12 +44,16 @@ Gem::Specification.new do |spec|
   spec.add_dependency "faraday-multipart"
   spec.add_dependency "faraday-retry"
   spec.add_dependency "fiddle"
-  spec.add_dependency "pastel", "~> 0.8", "= 0.8.0"
-  spec.add_dependency "rake", "~> 13", ">= 13.3.0"
+  spec.add_dependency "pastel", "= 0.8.0"
+  spec.add_dependency "rake", "~> 13"
   spec.add_dependency "thor", "~> 1.5.0", ">= 1.5.0"
-  spec.add_dependency "tty-prompt", "~> 0.23", "= 0.23.1"
-  spec.add_dependency "tty-table", "~> 0.12", "= 0.12.0"
+  spec.add_dependency "tty-prompt", "= 0.23.1"
+  spec.add_dependency "tty-table", "= 0.12.0"
   spec.add_dependency "whirly", "~> 0.3", ">= 0.3.0"
 
   spec.metadata["rubygems_mfa_required"] = "true"
+  spec.metadata["homepage_uri"] = spec.homepage
+  spec.metadata["source_code_uri"] = "https://github.com/o-200/neocities-red"
+  spec.metadata["changelog_uri"] = "https://github.com/o-200/neocities-red/blob/main/CHANGELOG.md"
+  spec.metadata["documentation_uri"] = "https://github.com/o-200/neocities-red#readme"
 end
