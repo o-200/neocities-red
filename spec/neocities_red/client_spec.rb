@@ -191,7 +191,7 @@ RSpec.describe NeocitiesRed::Client do
       end
 
       context "when file already exists on server with same hash" do
-        let(:mock_hash_response) { { result: "success", files: { :"test_upload.txt" => true } } }
+        let(:mock_hash_response) { { result: "success", files: { "test_upload.txt": true } } }
 
         before do
           allow(client).to receive(:upload_hash).and_return(mock_hash_response)

@@ -27,7 +27,7 @@ Gem::Specification.new do |spec|
       files = Dir.glob("**/*", File::FNM_DOTMATCH).select do |path|
         File.file?(path) &&
           !path.start_with?("test/", "spec/", "features/", ".git/", ".github/", ".rubocop_cache/") &&
-            path != ".yardopts"
+          path != ".yardopts"
       end
     end
 
