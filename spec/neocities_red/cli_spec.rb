@@ -87,6 +87,7 @@ RSpec.describe NeocitiesRed::CLI do
       cli.send(:persist_config, API_KEY: "secret", SITENAME: "test-site")
 
       expect(File.read(config_path)).to eq('{"API_KEY":"secret","SITENAME":"test-site"}')
+      skip "chmod is a no-op on Windows" if Gem.win_platform?
       expect(File.stat(config_path).mode & 0o777).to eq(0o600)
     end
   end
