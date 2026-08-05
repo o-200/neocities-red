@@ -47,7 +47,7 @@ RSpec.describe NeocitiesRed::Services::Site::Pusher do
   end
 
   before do
-    allow(NeocitiesRed::Services::File::Uploader).to receive(:new) do |_client, filepath, remote_path|
+    allow(NeocitiesRed::Services::File::Uploader).to receive(:new) do |_client, filepath, remote_path, _display|
       upload_calls << [filepath.to_s, remote_path.to_s]
       uploader_instance
     end

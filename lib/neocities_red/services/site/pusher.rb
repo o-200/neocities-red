@@ -5,12 +5,45 @@ require "digest"
 
 module NeocitiesRed
   module Services
+    # Site-level operations: push, diff, info, and export.
     module Site
+      # Recursively uploads a local directory to the Neocities site.
+      #
+      # Orchestrates the full push workflow:
+      # 1. Validates the root path
+      # 2. Optionally prunes remote files not present locally
+      # 3. Collects all files via glob
+      # 4. Applies .gitignore rules, dotfile filtering, exclusions, and
+      #    optimized (hash-based) filtering
+      # 5. Uploads remaining files in parallel via a worker pool
+      #
+      # @example Basic push
+      #   pusher = NeocitiesRed::Services::Site::Pusher.new(
+      #     client, display,
+      #     root: ".", no_gitignore: false, ignore_dotfiles: false,
+      #     exclude: [], dry_run: false, prune: false, optimized: false
+      #   )
+      #   pusher.push
+      #
+      # @see NeocitiesRed::Services::File::Uploader Individual file upload
+      # @see NeocitiesRed::Services::Common::Exclusions Exclusion builder
+      # @see NeocitiesRed::Services::Common::WorkerPool Thread pool
       class Pusher
-        # warning - the big quantity of working threads could be considered like-a DDOS.
-        # Your ip-address could get banned on neocities for a few days.
+        # @return [Integer] maximum concurrent upload threads.
+        #
+        # Warning: a high thread count may be flagged as DDOS-like traffic
+        # by Neocities, potentially resulting in a temporary IP ban.
         MAX_THREADS = 5
 
+        # @param client [NeocitiesRed::Client] authenticated API client
+        # @param display [NeocitiesRed::CliDisplay] output helper
+        # @param root [String] local directory path to push
+        # @param no_gitignore [Boolean] when true, ignores .gitignore rules
+        # @param ignore_dotfiles [Boolean] when true, skips files starting with "."
+        # @param exclude [Array<String>] additional paths to exclude from upload
+        # @param dry_run [Boolean] when true, simulates the push without uploading
+        # @param prune [Boolean] when true, deletes remote files not present locally
+        # @param optimized [Boolean] when true, skips files whose SHA1 matches the server
         def initialize(client, display, root:, no_gitignore:, ignore_dotfiles:, exclude:, dry_run:, prune:, optimized:)
           @client = client
           @display = display
@@ -23,6 +56,10 @@ module NeocitiesRed
           @optimized = optimized
         end
 
+        # Executes the full push workflow.
+        #
+        # @return [void]
+        # @raise [ArgumentError] if the root path does not exist or is not a directory
         def push
           root_path = Pathname(@root)
           validate_root_path!(root_path)
@@ -30,7 +67,7 @@ module NeocitiesRed
           @display.display_dry_run_notice if @dry_run
           prune_remote_files if @prune
 
-          excluded_files = build_push_exclusions(@exclude)
+          excluded_files = Services::Common::Exclusions.build(@exclude)
 
           Dir.chdir(root_path) do
             paths = Dir.glob(::File.join("**", "*"), ::File::FNM_DOTMATCH)
@@ -46,27 +83,22 @@ module NeocitiesRed
 
         private
 
+        # Validates that the root path exists and is a directory.
+        #
+        # @param root_path [Pathname] the local root directory
+        # @raise [ArgumentError] if validation fails
         def validate_root_path!(root_path)
           raise ArgumentError, "path #{root_path} does not exist" unless root_path.exist?
           raise ArgumentError, "provided path is not a directory" unless root_path.directory?
         end
 
-        def build_push_exclusions(excluded_entries)
-          excluded_files = []
-
-          excluded_entries.each do |entry|
-            filepath = Pathname.new(entry).cleanpath.to_s
-
-            if ::File.file?(filepath)
-              excluded_files << filepath
-            elsif ::File.directory?(filepath)
-              excluded_files.concat(Dir.glob(::File.join(filepath, "**", "*"), ::File::FNM_DOTMATCH).push(filepath))
-            end
-          end
-
-          excluded_files
-        end
-
+        # Filters file paths based on .gitignore rules.
+        #
+        # Reads the local .gitignore and removes matching paths using
+        # +File.fnmatch+ for glob pattern support.
+        #
+        # @param paths [Array<String>] all file paths in the root
+        # @return [Array<String>> filtered paths not matched by .gitignore
         def apply_gitignore(paths)
           return paths unless ::File.exist?(".gitignore")
 
@@ -82,6 +114,14 @@ module NeocitiesRed
           filtered
         end
 
+        # Computes which files can be skipped because their SHA1 hash
+        # matches the server version.
+        #
+        # Fetches the remote file list, computes local SHA1 hashes, and
+        # returns paths that don't need re-uploading.
+        #
+        # @param paths [Array<String>] all local file paths
+        # @return [Array<String>] file paths to exclude (already up to date)
         def optimized_exclusions(paths)
           hex = paths.select { |path| ::File.file?(path) }
                      .map { |file| { filepath: file, sha1_hash: Digest::SHA1.file(file).hexdigest } }
@@ -97,31 +137,27 @@ module NeocitiesRed
              .map { |entry| entry[:filepath] }
         end
 
+        # Uploads all filtered paths in parallel using a worker pool.
+        #
+        # @param paths [Array<Pathname>] local files to upload
+        # @return [void]
         def upload_files(paths)
-          task_queue = Queue.new
-          paths.each { |path| task_queue.push(path) }
+          worker_pool = Services::Common::WorkerPool.new(MAX_THREADS) do |path|
+            next if path.directory?
 
-          threads = []
-          MAX_THREADS.times do
-            threads << Thread.new do
-              until task_queue.empty?
-                path = begin
-                  task_queue.pop(true)
-                rescue StandardError
-                  nil
-                end
-
-                next if path.nil? || path.directory?
-
-                Services::File::Uploader.new(@client, path, path).upload
-              end
-            end
+            Services::File::Uploader.new(@client, path, path, display: @display).upload
           end
 
-          threads.each(&:join)
+          worker_pool.process(paths)
           @display.display_upload_complete
         end
 
+        # Deletes remote files that no longer exist in the local directory.
+        #
+        # Skips directories that have already been pruned. Respects the
+        # +@dry_run+ flag.
+        #
+        # @return [void]
         def prune_remote_files
           pruned_dirs = []
           resp = @client.list

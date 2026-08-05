@@ -1,0 +1,13 @@
+--markup markdown
+--output-dir doc
+--protected
+--private
+--no-cache
+--readme README.md
+--title "NeocitiesRed"
+--exclude spec/
+--exclude ext/
+-
+LICENSE
+CONTRIBUTING.md
+SECURITY.md

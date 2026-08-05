@@ -8,17 +8,21 @@ on:
 
 jobs:
   lint:
-    name: Lint (ubuntu-latest)
+    name: Lint (Ruby ${{ matrix.ruby-version }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby-version: ['3.4', '3.5', '4.0']
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Ruby 4.0.0
+      - name: Set up Ruby ${{ matrix.ruby-version }}
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 4.0.0
+          ruby-version: ${{ matrix.ruby-version }}
           bundler-cache: true
 
       - name: Debug versions
@@ -31,59 +35,65 @@ jobs:
         run: bundle exec rubocop
 
   test_linux:
-    name: Test (ubuntu-latest)
+    name: Test (Ruby ${{ matrix.ruby-version }}, ubuntu-latest)
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby-version: ['3.4', '3.5', '4.0']
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Ruby 4.0.0
+      - name: Set up Ruby ${{ matrix.ruby-version }}
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 4.0.0
+          ruby-version: ${{ matrix.ruby-version }}
           bundler-cache: true
 
       - name: Run tests
         run: bundle exec rspec
 
   test_non_linux:
-    name: Test (${{ matrix.os }})
+    name: Test (Ruby ${{ matrix.ruby-version }}, ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [macos-latest, windows-latest]
+        ruby-version: ['3.4', '4.0']
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Ruby 4.0.0
+      - name: Set up Ruby ${{ matrix.ruby-version }}
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 4.0.0
+          ruby-version: ${{ matrix.ruby-version }}
           bundler-cache: true
 
       - name: Run tests
         run: bundle exec rspec
 
   smoke_unix:
-    name: Start CLI (${{ matrix.os }})
+    name: Start CLI (Ruby ${{ matrix.ruby-version }}, ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest]
+        ruby-version: ['3.4', '4.0']
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Ruby 4.0.0
+      - name: Set up Ruby ${{ matrix.ruby-version }}
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 4.0.0
+          ruby-version: ${{ matrix.ruby-version }}
           bundler-cache: true
 
       - name: Start CLI
@@ -92,17 +102,21 @@ jobs:
           bundle exec bin/neocities-red
 
   smoke_windows:
-    name: Start CLI (windows-latest)
+    name: Start CLI (Ruby ${{ matrix.ruby-version }}, windows-latest)
     runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby-version: ['3.4', '4.0']
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Ruby 4.0.0
+      - name: Set up Ruby ${{ matrix.ruby-version }}
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 4.0.0
+          ruby-version: ${{ matrix.ruby-version }}
           bundler-cache: true
 
       - name: Start CLI
@@ -124,7 +138,7 @@ jobs:
           usesh: true
           prepare: |
             pkg install -y ca_root_nss git rubygem-bundler
-            pkg install -y ruby34
+            pkg install -y ruby
           run: |
             RUBY_BIN="$(command -v ruby34 || command -v ruby)"
             "$RUBY_BIN" -v

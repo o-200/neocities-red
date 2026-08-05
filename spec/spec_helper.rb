@@ -2,7 +2,7 @@
 
 require "neocities_red"
 require "fileutils"
-require "webmock"
+require "webmock/rspec"
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure

@@ -191,7 +191,7 @@ RSpec.describe NeocitiesRed::Client do
       end
 
       context "when file already exists on server with same hash" do
-        let(:mock_hash_response) { { result: "success", files: { "test_upload.txt" => true } } }
+        let(:mock_hash_response) { { result: "success", files: { "test_upload.txt": true } } }
 
         before do
           allow(client).to receive(:upload_hash).and_return(mock_hash_response)
@@ -247,60 +247,17 @@ RSpec.describe NeocitiesRed::Client do
     end
   end
 
-  describe "#pull" do
+  describe "#download" do
     let(:client) { described_class.new(api_key: api_key) }
-    let(:temp_dir) { Dir.mktmpdir }
-    let(:mock_list_response) { { result: "success", files: [] } }
-    let(:mock_info_response) { { result: "success", info: { domain: nil } } }
-
-    around do |example|
-      original_dir = Dir.pwd
-      Dir.chdir(temp_dir)
-      example.run
-    ensure
-      Dir.chdir(original_dir)
-      FileUtils.rm_rf(temp_dir)
-    end
+    let(:mock_conn_response) { instance_double(Faraday::Response, status: 200, body: "raw content") }
 
     before do
-      allow(client).to receive_messages(list: mock_list_response, info: mock_info_response)
-      allow(client.instance_variable_get(:@conn)).to receive(:get).and_return(
-        instance_double(Faraday::Response, status: 200, body: "")
-      )
+      allow(client.instance_variable_get(:@conn)).to receive(:get).and_return(mock_conn_response)
     end
 
-    it "pulls files from the site" do
-      expect { client.pull(sitename, nil, nil, quiet: true) }.not_to raise_error
-    end
-
-    it "supports last_pull_time and last_pull_loc parameters" do
-      last_pull_time = Time.now - 86_400
-      last_pull_loc = Dir.pwd
-      expect { client.pull(sitename, last_pull_time, last_pull_loc, quiet: true) }.not_to raise_error
-    end
-
-    context "when site has custom domain" do
-      let(:mock_info_response) { { result: "success", info: { domain: "example.com" } } }
-
-      it "uses the custom domain for fetching files" do
-        expect { client.pull(sitename, nil, nil, quiet: true) }.not_to raise_error
-      end
-    end
-
-    context "when API returns error for info" do
-      let(:mock_info_response) { { result: "error", message: "Site not found" } }
-
-      it "raises an error" do
-        expect { client.pull(sitename, nil, nil, quiet: true) }.to raise_error(ArgumentError, /Site not found/)
-      end
-    end
-
-    context "when API returns error for list" do
-      let(:mock_list_response) { { result: "error", message: "List failed" } }
-
-      it "raises an error" do
-        expect { client.pull(sitename, nil, nil, quiet: true) }.to raise_error(ArgumentError, /List failed/)
-      end
+    it "returns the raw Faraday response for a url" do
+      response = client.download("https://example.com/index.html")
+      expect(response).to eq(mock_conn_response)
     end
   end
 end

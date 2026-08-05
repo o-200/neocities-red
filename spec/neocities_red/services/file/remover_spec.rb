@@ -1,21 +1,19 @@
 # frozen_string_literal: true
 
 require "spec_helper"
-require "stringio"
 
 RSpec.describe NeocitiesRed::Services::File::Remover do
-  subject(:remover) { described_class.new(client, filepath) }
+  subject(:remover) { described_class.new(client, filepath, display: display) }
 
   let(:client) { instance_double(NeocitiesRed::Client) }
   let(:filepath) { "test_file.txt" }
-  let(:io) { StringIO.new }
-  let(:pastel) { object_double(Pastel.new(eachline: "\n")) }
-
-  before do
-    allow(Pastel).to receive(:new).with(eachline: "\n").and_return(pastel)
-    allow(pastel).to receive(:bold) { |msg| msg }
-    allow(pastel).to receive_messages(green: pastel, yellow: pastel)
-    allow($stdout).to receive_messages(puts: nil, print: nil)
+  let(:display) do
+    instance_double(
+      NeocitiesRed::CliDisplay,
+      display_delete_progress: nil,
+      display_delete_success: nil,
+      display_delete_error: nil
+    )
   end
 
   describe "#initialize" do
@@ -46,14 +44,10 @@ RSpec.describe NeocitiesRed::Services::File::Remover do
         expect(client).to have_received(:delete).with(filepath)
       end
 
-      it "prints deletion progress message" do
+      it "displays delete progress and success" do
         remover.remove
-        expect(pastel).to have_received(:bold).with("Deleting #{filepath} ...")
-      end
-
-      it "prints SUCCESS message" do
-        remover.remove
-        expect(pastel).to have_received(:green)
+        expect(display).to have_received(:display_delete_progress).with(filepath)
+        expect(display).to have_received(:display_delete_success)
       end
 
       it "returns the success response" do
@@ -76,9 +70,9 @@ RSpec.describe NeocitiesRed::Services::File::Remover do
         expect(client).to have_received(:delete).with(filepath)
       end
 
-      it "prints error message" do
+      it "displays delete error" do
         remover.remove
-        expect(pastel).to have_received(:bold).with("File not found")
+        expect(display).to have_received(:display_delete_error).with(error_response)
       end
 
       it "returns the error response" do
@@ -96,9 +90,9 @@ RSpec.describe NeocitiesRed::Services::File::Remover do
         allow(client).to receive(:delete).with(filepath).and_return(exists_response)
       end
 
-      it "prints EXISTS message" do
+      it "displays delete error" do
         remover.remove
-        expect(pastel).to have_received(:yellow)
+        expect(display).to have_received(:display_delete_error).with(exists_response)
       end
 
       it "returns the error response" do

@@ -72,6 +72,7 @@ RSpec.describe NeocitiesRed::Services::Site::Differencer do
         .with(File.join("**", "*"), File::FNM_DOTMATCH)
         .and_return(globbed_paths)
 
+      allow(File).to receive(:file?).and_return(false)
       allow(File).to receive(:file?).with("index.html").and_return(true)
       allow(File).to receive(:file?).with("about.html").and_return(true)
       allow(File).to receive(:file?).with("contact.html").and_return(true)
@@ -88,7 +89,7 @@ RSpec.describe NeocitiesRed::Services::Site::Differencer do
     it "returns added, modified and removed paths" do
       added_paths, modified_paths, removed_paths = service.show
 
-      expect(added_paths).to eq(["GREEN(contact.html)", "GREEN(assets)"])
+      expect(added_paths).to eq(["GREEN(contact.html)", "GREEN(assets)", "GREEN(.git)", "GREEN(.env)"])
       expect(modified_paths).to eq(["YELLOW(about.html)"])
       expect(removed_paths).to eq(["RED(old.html)"])
     end
@@ -110,11 +111,11 @@ RSpec.describe NeocitiesRed::Services::Site::Differencer do
       expect(Digest::SHA1).not_to have_received(:file).with("assets")
     end
 
-    it "always excludes dotfiles and dot-directories from local paths" do
+    it "includes dotfiles and dot-directories by default" do
       added_paths, = service.show
 
-      expect(added_paths).not_to include("GREEN(.git)")
-      expect(added_paths).not_to include("GREEN(.env)")
+      expect(added_paths).to include("GREEN(.git)")
+      expect(added_paths).to include("GREEN(.env)")
     end
 
     context "when exclude is provided" do
@@ -123,7 +124,7 @@ RSpec.describe NeocitiesRed::Services::Site::Differencer do
       it "excludes paths from diff" do
         added_paths, modified_paths, removed_paths = service.show
 
-        expect(added_paths).to eq(["GREEN(assets)"])
+        expect(added_paths).to eq(["GREEN(assets)", "GREEN(.git)", "GREEN(.env)"])
         expect(modified_paths).to eq(["YELLOW(about.html)"])
         expect(removed_paths).to eq([])
       end
@@ -132,12 +133,37 @@ RSpec.describe NeocitiesRed::Services::Site::Differencer do
     context "when ignore_dotfiles is true" do
       let(:ignore_dotfiles) { true }
 
-      it "still returns the same result because dotfiles are already filtered earlier" do
+      it "excludes dotfiles and dot-directories" do
         added_paths, modified_paths, removed_paths = service.show
 
         expect(added_paths).to eq(["GREEN(contact.html)", "GREEN(assets)"])
+        expect(added_paths).not_to include("GREEN(.git)")
+        expect(added_paths).not_to include("GREEN(.env)")
         expect(modified_paths).to eq(["YELLOW(about.html)"])
         expect(removed_paths).to eq(["RED(old.html)"])
+      end
+
+      it "does not hash dotfiles" do
+        service.show
+
+        expect(Digest::SHA1).not_to have_received(:file).with(".env")
+      end
+    end
+
+    context "when server has directories" do
+      let(:server_files) do
+        [
+          { path: "index.html", sha1_hash: "server-index-sha", is_directory: false },
+          { path: "assets", is_directory: true },
+          { path: "old.html", sha1_hash: "server-old-sha", is_directory: false }
+        ]
+      end
+
+      it "does not list server directories as removed" do
+        _, _, removed_paths = service.show
+
+        expect(removed_paths).to eq(["RED(old.html)"])
+        expect(removed_paths).not_to include("RED(assets)")
       end
     end
   end
