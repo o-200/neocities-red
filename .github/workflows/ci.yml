@@ -138,7 +138,7 @@ jobs:
           usesh: true
           prepare: |
             pkg install -y ca_root_nss git rubygem-bundler
-            pkg install -y ruby34
+            pkg install -y ruby
           run: |
             RUBY_BIN="$(command -v ruby34 || command -v ruby)"
             "$RUBY_BIN" -v
