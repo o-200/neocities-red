@@ -1,0 +1,71 @@
+---
+layout: docs
+title: Ruby Library — Neocities Red
+description: >-
+  Use Neocities Red as a Ruby client to upload, delete and list files on
+  Neocities programmatically. Covers the basic Client API and the namespaced
+  Services classes.
+---
+
+<h1>Ruby Library</h1>
+
+<p class="lead">Beyond the CLI, Neocities Red ships a clean Ruby client you can embed in scripts, rake tasks and static site generator builds.</p>
+
+<h2>Basic client</h2>
+
+<div class="code-block">
+  <div class="code-label"><span class="dot"></span>Ruby</div>
+  <pre><code>require 'neocities-red'
+
+client = NeocitiesRed::Client.new(api_key: 'YOUR_API_KEY')
+
+client.upload(local_path, remote_path)
+client.delete(remote_path)
+client.list(remote_path)
+client.info(sitename)</code></pre>
+</div>
+
+<p>
+  The client supports both API-key (<code>api_key:</code>) and basic-auth
+  (<code>sitename:</code>/<code>password:</code>) authentication, retries
+  transient failures (429/5xx) automatically, and exposes low-level helpers like
+  <code>upload_hash</code>, <code>delete_wrapper_with_dry_run</code>,
+  <code>key</code> and <code>download</code>.
+</p>
+
+<h2>Advanced: services</h2>
+
+<p>For larger automation, use the namespaced service classes:</p>
+
+<div class="code-block">
+  <div class="code-label"><span class="dot"></span>Ruby</div>
+  <pre><code>client = NeocitiesRed::Client.new(
+  sitename: 'o200',
+  password: 'secret'
+)
+
+service = NeocitiesRed::Services::File::List.new(
+  client,
+  '.',
+  true
+)
+
+files = service.show</code></pre>
+</div>
+
+<h2>Service namespaces</h2>
+
+<ul>
+  <li><code>NeocitiesRed::Services::File</code> — <code>Uploader</code>, <code>FolderUploader</code>, <code>List</code>, <code>Remover</code></li>
+  <li><code>NeocitiesRed::Services::Site</code> — <code>Pusher</code>, <code>Differencer</code>, <code>Exporter</code>, <code>Informer</code></li>
+  <li><code>NeocitiesRed::Services::Common</code> — <code>Exclusions</code>, <code>WorkerPool</code>, <code>Pizza</code></li>
+</ul>
+
+<blockquote>
+  <p>Prefer the CLI? Every service is also exposed as a command — see the <a href="{{ site.baseurl }}/cli.html">CLI reference</a>.</p>
+</blockquote>
+
+<nav class="page-nav">
+  <a href="{{ site.baseurl }}/authentication.html">← Authentication</a>
+  <a href="{{ site.baseurl }}/faq.html">Next: FAQ →</a>
+</nav>

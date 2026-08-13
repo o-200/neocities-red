@@ -1,0 +1,68 @@
+---
+layout: docs
+title: Quick Start — Neocities Red
+description: >-
+  Deploy a static site to Neocities in three commands. Install Neocities Red,
+  authenticate with your sitename and password, then push your whole site from
+  the terminal.
+---
+
+<h1>Quick Start</h1>
+
+<p class="lead">Deploy your static site to Neocities in under a minute.</p>
+
+<h2>1. Install</h2>
+
+<div class="code-block">
+  <div class="code-label"><span class="dot"></span>Install</div>
+  <pre><code>gem install neocities-red</code></pre>
+</div>
+
+<h2>2. Authenticate</h2>
+
+<p>
+  The first authenticated command prompts you for your Neocities <strong>sitename
+  (or username) and password</strong>. The resulting API key is stored locally for
+  future runs.
+</p>
+
+<p>You can also skip the prompt entirely with an API key:</p>
+
+<div class="code-block">
+  <div class="code-label"><span class="dot"></span>With an API key</div>
+  <pre><code>export NEOCITIES_API_KEY="your-api-key"
+neocities-red push .</code></pre>
+</div>
+
+<p>Read more in the <a href="{{ site.baseurl }}/authentication.html">authentication guide</a>.</p>
+
+<h2>3. Push your site</h2>
+
+<p>From your site's directory, upload the whole folder recursively:</p>
+
+<div class="code-block">
+  <div class="code-label"><span class="dot"></span>Deploy</div>
+  <pre><code>cd ~/my-neocities-site
+neocities-red push .</code></pre>
+</div>
+
+<p>
+  <code>push</code> respects your <code>.gitignore</code> rules by default, uploads
+  files in parallel (up to 5 workers) and retries transient API failures
+  automatically.
+</p>
+
+<h2>Helpful first commands</h2>
+
+<ul>
+  <li><code>neocities-red help</code> — list every command</li>
+  <li><code>neocities-red help push</code> — per-command help</li>
+  <li><code>neocities-red diff .</code> — preview what would change before pushing</li>
+  <li><code>neocities-red push . --dry-run</code> — show intended actions without uploading</li>
+  <li><code>neocities-red info</code> — site stats</li>
+</ul>
+
+<nav class="page-nav">
+  <a href="{{ site.baseurl }}/install.html">← Installation</a>
+  <a href="{{ site.baseurl }}/cli.html">Next: CLI Reference →</a>
+</nav>

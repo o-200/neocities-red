@@ -9,6 +9,7 @@ AllCops:
     - "vendor/**/*"
     - "tmp/**/*"
     - "spec/fixtures/**/*"
+    - "docs/**/*"
 
 Layout/LineLength:
   Max: 150

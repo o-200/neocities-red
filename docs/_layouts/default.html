@@ -1,0 +1,22 @@
+---
+---
+<!DOCTYPE html>
+<html lang="{{ page.lang | default: site.lang | default: 'en' }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preload" as="style" href="{{ site.baseurl }}/assets/css/main.css">
+  <link rel="stylesheet" href="{{ site.baseurl }}/assets/css/main.css">
+  {% seo %}
+  {%- include structured-data.html -%}
+  <link rel="icon" type="image/svg+xml" href="{{ site.baseurl }}/assets/img/favicon.svg">
+</head>
+<body class="{% if page.layout == 'landing' %}landing{% else %}docs-page{% endif %}">
+  {%- include header.html -%}
+  <main>
+    {{ content }}
+  </main>
+  {%- include footer.html -%}
+  <script src="{{ site.baseurl }}/assets/js/main.js" defer></script>
+</body>
+</html>

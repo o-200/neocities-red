@@ -1,0 +1,30 @@
+{%- if page.url == "/" or page.url == "/index.html" -%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Neocities Red",
+  "alternateName": "neocities-red",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS, Windows, FreeBSD",
+  "url": "{{ site.url }}{{ site.baseurl }}/",
+  "description": "{{ site.description | escape }}",
+  "version": "1.2.0",
+  "softwareVersion": "1.2.0",
+  "downloadUrl": "https://rubygems.org/gems/neocities-red",
+  "installUrl": "https://rubygems.org/gems/neocities-red",
+  "license": "https://github.com/o-200/neocities-red/blob/master/LICENSE",
+  "codeRepository": "https://github.com/o-200/neocities-red",
+  "author": {
+    "@type": "Organization",
+    "name": "o-200"
+  },
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "featureList": "Parallel uploads, smart diffing, automatic retries, recursive uploads, .gitignore-aware push, incremental pull, CLI and Ruby client"
+}
+</script>
+{%- endif -%}

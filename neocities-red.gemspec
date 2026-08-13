@@ -15,7 +15,7 @@ Gem::Specification.new do |spec|
   spec.files         = Dir.chdir(File.expand_path(__dir__)) do
     files = begin
       if system("git", "rev-parse", "--is-inside-work-tree", out: File::NULL, err: File::NULL)
-        `git ls-files -z`.split("\x0").reject { |f| f == ".yardopts" }
+        `git ls-files -z`.split("\x0").reject { |f| f == ".yardopts" || f.start_with?("docs/") }
       else
         []
       end

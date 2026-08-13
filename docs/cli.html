@@ -1,0 +1,174 @@
+---
+layout: docs
+title: CLI Reference — Neocities Red
+description: >-
+  Complete Neocities Red CLI reference: push, upload, delete, diff, list, info,
+  pull, purge and logout commands with all flags and examples for deploying
+  static sites to Neocities.
+---
+
+<h1>CLI Reference</h1>
+
+<p class="lead">Every Neocities Red command, flag and example — the full command-line toolkit for managing a Neocities site.</p>
+
+<p>Run <code>neocities-red help</code> to list all commands, and <code>neocities-red help &lt;command&gt;</code> for detailed help on any command.</p>
+
+<h2>push</h2>
+
+<p>Recursively upload a local directory to your Neocities site. Respects <code>.gitignore</code> rules by default.</p>
+
+<table>
+  <thead>
+    <tr><th>Flag</th><th>Description</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>--no-gitignore</code></td><td>Ignore <code>.gitignore</code> filtering and upload matching files</td></tr>
+    <tr><td><code>--ignore-dotfiles</code></td><td>Skip dotfiles/dot-directories</td></tr>
+    <tr><td><code>-e</code>, <code>--exclude</code></td><td>Exclude file/directory paths (repeatable)</td></tr>
+    <tr><td><code>--dry-run</code></td><td>Show intended actions without mutating remote</td></tr>
+    <tr><td><code>--optimized</code></td><td>Skip files whose SHA1 hash already matches the server</td></tr>
+    <tr><td><code>--prune</code></td><td>Delete remote files that do not exist locally</td></tr>
+  </tbody>
+</table>
+
+<div class="code-block">
+  <div class="code-label"><span class="dot"></span>Examples</div>
+  <pre><code>neocities-red push .
+neocities-red push . --optimized --ignore-dotfiles
+neocities-red push . -e node_modules -e .git
+neocities-red push . --dry-run
+neocities-red push . --prune</code></pre>
+</div>
+
+<h2>upload</h2>
+
+<p>Upload an individual file or folder to your site.</p>
+
+<div class="code-block">
+  <div class="code-label"><span class="dot"></span>Examples</div>
+  <pre><code>neocities-red upload index.html
+neocities-red upload assets/ images/assets</code></pre>
+</div>
+
+<h2>diff</h2>
+
+<p>Compare a local directory with the remote site and show added, modified and removed files.</p>
+
+<table>
+  <thead>
+    <tr><th>Flag</th><th>Description</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>--ignore-dotfiles</code></td><td>Skip dotfiles/dot-directories</td></tr>
+    <tr><td><code>-e</code>, <code>--exclude</code></td><td>Exclude file/directory paths (repeatable)</td></tr>
+  </tbody>
+</table>
+
+<div class="code-block">
+  <div class="code-label"><span class="dot"></span>Examples</div>
+  <pre><code>neocities-red diff .
+neocities-red diff ./my-website --ignore-dotfiles
+neocities-red diff . -e secret.txt</code></pre>
+</div>
+
+<h2>list</h2>
+
+<p>List files from your Neocities site.</p>
+
+<table>
+  <thead>
+    <tr><th>Flag</th><th>Description</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>-d</code>, <code>--detail</code></td><td>Show a detailed table with size, SHA1 hash and last-updated timestamp</td></tr>
+    <tr><td><code>-a</code>, <code>--all</code></td><td>List the entire site (ignore the path argument)</td></tr>
+  </tbody>
+</table>
+
+<div class="code-block">
+  <div class="code-label"><span class="dot"></span>Examples</div>
+  <pre><code>neocities-red list
+neocities-red list images -d
+neocities-red list -a</code></pre>
+</div>
+
+<h2>info</h2>
+
+<p>Show information and statistics for a site (defaults to your own site).</p>
+
+<div class="code-block">
+  <div class="code-label"><span class="dot"></span>Examples</div>
+  <pre><code>neocities-red info
+neocities-red info fauux</code></pre>
+</div>
+
+<h2>pull</h2>
+
+<p>Download the most recent version of files from your site. Skips files that haven't changed since your last pull.</p>
+
+<table>
+  <thead>
+    <tr><th>Flag</th><th>Description</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>-q</code>, <code>--quiet</code></td><td>Show a spinner instead of per-file output</td></tr>
+  </tbody>
+</table>
+
+<div class="code-block">
+  <div class="code-label"><span class="dot"></span>Examples</div>
+  <pre><code>neocities-red pull
+neocities-red pull --quiet</code></pre>
+</div>
+
+<h2>delete</h2>
+
+<p>Delete one or more files from your site.</p>
+
+<div class="code-block">
+  <div class="code-label"><span class="dot"></span>Examples</div>
+  <pre><code>neocities-red delete old.html
+neocities-red delete old.html archived/old.css</code></pre>
+</div>
+
+<h2>purge</h2>
+
+<p>Delete <strong>everything</strong> from your site. Intended for development sites only — use with care.</p>
+
+<table>
+  <thead>
+    <tr><th>Flag</th><th>Description</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>-y</code>, <code>--yes</code></td><td>Confirm the destructive action (required)</td></tr>
+    <tr><td><code>--dry-run</code></td><td>Show what would be deleted without deleting</td></tr>
+  </tbody>
+</table>
+
+<div class="code-block">
+  <div class="code-label"><span class="dot"></span>Examples</div>
+  <pre><code>neocities-red purge -y
+neocities-red purge -y --dry-run</code></pre>
+</div>
+
+<h2>logout</h2>
+
+<p>Remove the stored API key from the config. Requires confirmation.</p>
+
+<div class="code-block">
+  <div class="code-label"><span class="dot"></span>Examples</div>
+  <pre><code>neocities-red logout -y</code></pre>
+</div>
+
+<h2>version &amp; pizza</h2>
+
+<div class="code-block">
+  <div class="code-label"><span class="dot"></span>Examples</div>
+  <pre><code>neocities-red version   # print the gem version
+neocities-red pizza     # order a free pizza (easter egg) 🍕</code></pre>
+</div>
+
+<nav class="page-nav">
+  <a href="{{ site.baseurl }}/quick-start.html">← Quick Start</a>
+  <a href="{{ site.baseurl }}/authentication.html">Next: Authentication →</a>
+</nav>

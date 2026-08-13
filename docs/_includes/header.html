@@ -1,0 +1,22 @@
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <nav class="container nav" aria-label="Main">
+    <a class="brand" href="{{ site.baseurl }}/">
+      <span class="brand-mark" aria-hidden="true">🟥</span>
+      <span class="brand-text">Neocities&nbsp;Red</span>
+    </a>
+    <button class="nav-toggle" aria-expanded="false" aria-controls="site-nav" aria-label="Toggle navigation">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" id="site-nav">
+      <li><a href="{{ site.baseurl }}/" {% if page.url == '/' %}aria-current="page"{% endif %}>Home</a></li>
+      <li><a href="{{ site.baseurl }}/install.html" {% if page.url == '/install.html' %}aria-current="page"{% endif %}>Install</a></li>
+      <li><a href="{{ site.baseurl }}/quick-start.html" {% if page.url == '/quick-start.html' %}aria-current="page"{% endif %}>Quick&nbsp;Start</a></li>
+      <li><a href="{{ site.baseurl }}/cli.html" {% if page.url == '/cli.html' %}aria-current="page"{% endif %}>CLI&nbsp;Reference</a></li>
+      <li><a href="{{ site.baseurl }}/authentication.html" {% if page.url == '/authentication.html' %}aria-current="page"{% endif %}>Authentication</a></li>
+      <li><a href="{{ site.baseurl }}/library.html" {% if page.url == '/library.html' %}aria-current="page"{% endif %}>Ruby&nbsp;Library</a></li>
+      <li><a href="{{ site.baseurl }}/faq.html" {% if page.url == '/faq.html' %}aria-current="page"{% endif %}>FAQ</a></li>
+      <li><a class="btn btn-small" href="https://rubygems.org/gems/neocities-red" rel="noopener" target="_blank">Install</a></li>
+    </ul>
+  </nav>
+</header>

@@ -1,0 +1,71 @@
+---
+layout: docs
+title: Authentication — Neocities Red
+description: >-
+  How Neocities Red authenticates with the Neocities API: API keys, environment
+  variables, stored config and interactive login. Includes a table of config file
+  locations per platform.
+---
+
+<h1>Authentication</h1>
+
+<p class="lead">Neocities Red resolves your Neocities credentials in a predictable order — so you can log in interactively or script it in CI.</p>
+
+<h2>Credential resolution order</h2>
+
+<ol>
+  <li><strong><code>--api-key</code> flag</strong> — <code>neocities-red --api-key &lt;key&gt; push .</code></li>
+  <li><strong><code>NEOCITIES_API_KEY</code> environment variable</strong></li>
+  <li><strong>Stored config</strong> — the API key saved by a previous interactive login</li>
+  <li><strong>Interactive login</strong> — prompts for sitename/username and password</li>
+</ol>
+
+<h2>Environment variables</h2>
+
+<p>For non-interactive logins (for example, in CI), you can set:</p>
+
+<table>
+  <thead>
+    <tr><th>Variable</th><th>Purpose</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>NEOCITIES_API_KEY</code></td><td>API key used as a Bearer token</td></tr>
+    <tr><td><code>NEOCITIES_SITENAME</code></td><td>Default sitename/username for the login prompt</td></tr>
+    <tr><td><code>NEOCITIES_PASSWORD</code></td><td>Default password for the login prompt</td></tr>
+  </tbody>
+</table>
+
+<div class="code-block">
+  <div class="code-label"><span class="dot"></span>Non-interactive push</div>
+  <pre><code>NEOCITIES_API_KEY="your-api-key" neocities-red push .</code></pre>
+</div>
+
+<h2>Stored config file</h2>
+
+<p>The config file is stored per platform:</p>
+
+<table>
+  <thead>
+    <tr><th>Platform</th><th>Location</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Linux</td><td><code>$XDG_CONFIG_HOME/neocities/config.json</code> (defaults to <code>~/.config/neocities/config.json</code>)</td></tr>
+    <tr><td>macOS</td><td><code>~/Library/Application Support/neocities/config.json</code></td></tr>
+    <tr><td>Windows</td><td><code>%LOCALAPPDATA%\neocities\config.json</code></td></tr>
+    <tr><td>FreeBSD / other</td><td><code>~/.neocities/config.json</code></td></tr>
+  </tbody>
+</table>
+
+<h2>Logout</h2>
+
+<p>Remove the stored API key with:</p>
+
+<div class="code-block">
+  <div class="code-label"><span class="dot"></span>Logout</div>
+  <pre><code>neocities-red logout -y</code></pre>
+</div>
+
+<nav class="page-nav">
+  <a href="{{ site.baseurl }}/cli.html">← CLI Reference</a>
+  <a href="{{ site.baseurl }}/library.html">Next: Ruby Library →</a>
+</nav>

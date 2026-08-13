@@ -1,0 +1,111 @@
+---
+layout: docs
+title: FAQ — Neocities Red
+description: >-
+  Frequently asked questions about the Neocities Red CLI and Ruby client: how to
+  deploy a static site to Neocities, which Ruby versions are supported, how
+  uploads work and how it differs from the official CLI.
+---
+
+<h1>Frequently Asked Questions</h1>
+
+<p class="lead">Answers to common questions about deploying sites to Neocities with Neocities Red.</p>
+
+<div class="faq">
+  <details>
+    <summary>What is Neocities Red?</summary>
+    <div class="answer">
+      <p>Neocities Red is a modern command-line client and Ruby library for
+      <a href="https://neocities.org" rel="noopener" target="_blank">Neocities</a> —
+      the free web hosting service. It is a refactored and extended fork of the
+      official <code>neocities-ruby</code> gem, focused on performance,
+      reliability and real-world static site workflows.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>How do I deploy my static site to Neocities?</summary>
+    <div class="answer">
+      <p>Install the gem, log in once, then push your site's folder:</p>
+      <pre><code>gem install neocities-red
+cd ~/my-site
+neocities-red push .</code></pre>
+      <p>That's it — files are uploaded recursively and in parallel. See the
+      <a href="{{ site.baseurl }}/quick-start.html">quick start</a> for details.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Which Ruby versions are supported?</summary>
+    <div class="answer">
+      <p>Ruby 3.4 and newer. The gem is CI-tested against Ruby 3.4, 3.5 and 4.0
+      on Linux, macOS, Windows and FreeBSD.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Is my site uploaded faster than with the official CLI?</summary>
+    <div class="answer">
+      <p>Usually, yes. Neocities Red uploads files with up to 5 parallel workers,
+      retries flaky API and SSL failures automatically, and the
+      <code>--optimized</code> flag skips files whose SHA1 hash already matches
+      the server.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Does push upload my .env or secret files?</summary>
+    <div class="answer">
+      <p>No. <code>push</code> respects your <code>.gitignore</code> rules by
+      default. Use <code>--no-gitignore</code> to disable filtering, or
+      <code>-e</code>/<code>--exclude</code> to exclude specific paths.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Can I use Neocities Red with Jekyll, Hugo or Eleventy?</summary>
+    <div class="answer">
+      <p>Yes — that's one of the main design goals. Build your site with any
+      static site generator, then run <code>neocities-red push _site</code> (or
+      your output directory) to deploy it.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Can I use Neocities Red in CI/CD?</summary>
+    <div class="answer">
+      <p>Yes. Pass <code>--api-key</code> or set the <code>NEOCITIES_API_KEY</code>
+      environment variable for non-interactive deploys. See the
+      <a href="{{ site.baseurl }}/authentication.html">authentication guide</a>.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>How do I backup my Neocities site?</summary>
+    <div class="answer">
+      <p>Run <code>neocities-red pull</code> — it downloads your files and skips
+      anything unchanged since your last pull, so backups are fast.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>What does the <code>pizza</code> command do?</summary>
+    <div class="answer">
+      <p>It's a hidden easter egg. Order a free pizza — responsibility not
+      included.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Is Neocities Red free and open source?</summary>
+    <div class="answer">
+      <p>Yes. It is MIT-licensed, free to use, and contributions are welcome via
+      the <a href="https://github.com/o-200/neocities-red" rel="noopener" target="_blank">GitHub repository</a>.</p>
+    </div>
+  </details>
+</div>
+
+<nav class="page-nav">
+  <a href="{{ site.baseurl }}/library.html">← Ruby Library</a>
+  <a href="{{ site.baseurl }}/quick-start.html">Back to Quick Start →</a>
+</nav>

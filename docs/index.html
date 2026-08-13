@@ -1,0 +1,193 @@
+---
+layout: landing
+title: Neocities Red — A Modern Neocities CLI
+description: >-
+  Deploy static sites to Neocities from the command line with parallel uploads,
+  smart diffing and automatic retries. A fast, reliable Neocities CLI and Ruby
+  client for Jekyll, Hugo, Eleventy and more.
+---
+
+<section class="hero">
+  <div class="container">
+    <div class="hero-badges">
+      <a href="https://rubygems.org/gems/neocities-red" rel="noopener" target="_blank">
+        <img src="https://img.shields.io/gem/v/neocities-red?style=for-the-badge&logo=rubygems&logoColor=white" alt="Gem version" loading="lazy">
+      </a>
+      <a href="https://github.com/o-200/neocities-red" rel="noopener" target="_blank">
+        <img src="https://img.shields.io/github/license/o-200/neocities-red?style=for-the-badge" alt="License" loading="lazy">
+      </a>
+      <img src="https://img.shields.io/badge/Ruby-3.4%2B%20%7C%204.0-CC342D?style=for-the-badge&logo=ruby&logoColor=white" alt="Ruby 3.4+ | 4.0" loading="lazy">
+    </div>
+    <h1>Publish your static site to Neocities <span class="accent">from the terminal</span></h1>
+    <p class="subtitle">
+      Neocities Red is a fast, reliable Neocities CLI and Ruby client. Upload files
+      in parallel, sync only what changed, and forget flaky API timeouts — built
+      for Jekyll, Hugo, Eleventy and any other static site generator.
+    </p>
+    <div class="hero-cta">
+      <a class="btn" href="{{ site.baseurl }}/quick-start.html">Get started</a>
+      <a class="btn btn-ghost" href="{{ site.baseurl }}/cli.html">CLI reference</a>
+    </div>
+    <div class="hero-install">
+      <div class="code-block">
+        <div class="code-label"><span class="dot"></span>Install</div>
+        <pre><code>gem install neocities-red</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-alt">
+  <div class="container">
+    <div class="section-head">
+      <h2>Built for real-world workflows</h2>
+      <p>Everything the official CLI does — and everything it was missing.</p>
+    </div>
+    <div class="features">
+      <div class="feature">
+        <div class="icon" aria-hidden="true">⚡</div>
+        <h3>Parallel uploads</h3>
+        <p>Up to 5 concurrent workers push your site without waiting on each file.</p>
+      </div>
+      <div class="feature">
+        <div class="icon" aria-hidden="true">🔁</div>
+        <h3>Automatic retries</h3>
+        <p>Transient Neocities API and SSL failures are retried so deploys don't flake out.</p>
+      </div>
+      <div class="feature">
+        <div class="icon" aria-hidden="true">🧠</div>
+        <h3>Smart diffing</h3>
+        <p>Only upload files that actually changed — faster pushes, less API churn.</p>
+      </div>
+      <div class="feature">
+        <div class="icon" aria-hidden="true">📁</div>
+        <h3>Recursive uploads</h3>
+        <p>Upload whole directories in one command, matching your folder structure.</p>
+      </div>
+      <div class="feature">
+        <div class="icon" aria-hidden="true">⚙️</div>
+        <h3>SSG-friendly</h3>
+        <p>Works out of the box with Jekyll, Hugo, Eleventy, Astro and more.</p>
+      </div>
+      <div class="feature">
+        <div class="icon" aria-hidden="true">🔒</div>
+        <h3>.gitignore-aware push</h3>
+        <p>Respects your ignore rules by default — no secrets or build cruft uploaded.</p>
+      </div>
+      <div class="feature">
+        <div class="icon" aria-hidden="true">⬇️</div>
+        <h3>Incremental pull</h3>
+        <p>Skips files unchanged since your last pull — backup your site in seconds.</p>
+      </div>
+      <div class="feature">
+        <div class="icon" aria-hidden="true">🧩</div>
+        <h3>Ruby client + CLI</h3>
+        <p>A clean API client with namespaced services for scripting and automation.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <h2>From zero to deployed in three commands</h2>
+      <p>Authenticate once, then push your whole site whenever you build it.</p>
+    </div>
+    <div class="code-block">
+      <div class="code-label"><span class="dot"></span>Quick start</div>
+      <pre><code>gem install neocities-red
+
+# first authenticated command prompts for your sitename and password
+neocities-red push .
+</code></pre>
+    </div>
+    <p style="text-align:center; margin-top:1.6rem;">
+      <a class="btn" href="{{ site.baseurl }}/quick-start.html">Read the full quick start</a>
+    </p>
+  </div>
+</section>
+
+<section class="section section-alt">
+  <div class="container">
+    <div class="section-head">
+      <h2>Every command you need</h2>
+      <p>Push, pull, diff, upload and manage your site with an explicit, documented CLI.</p>
+    </div>
+    <div class="cols">
+      <div>
+        <h3>Command overview</h3>
+        <ul>
+          <li><code>push</code> — upload a whole directory (gitignore-aware)</li>
+          <li><code>upload</code> — upload individual files or folders</li>
+          <li><code>pull</code> — download your site (incremental)</li>
+          <li><code>diff</code> — compare local files with the server</li>
+          <li><code>list</code> — list remote files and metadata</li>
+          <li><code>delete</code> — remove files from your site</li>
+          <li><code>info</code> — site stats and info</li>
+          <li><code>purge</code> — wipe a development site</li>
+          <li><code>logout</code> — remove the stored API key</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Built for humans</h3>
+        <ul>
+          <li><code>neocities-red help &lt;command&gt;</code> — explicit per-command help</li>
+          <li><code>--dry-run</code> — preview before you deploy</li>
+          <li><code>--optimized</code> — skip files already on the server</li>
+          <li><code>--prune</code> — delete remote files missing locally</li>
+          <li><code>-e/--exclude</code> — exclude paths (repeatable)</li>
+          <li>Spinners, colored output, and a friendly <code>pizza</code> easter egg 🍕</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <h2>Why Neocities Red?</h2>
+      <p>A refactored and extended fork of the official neocities-ruby gem.</p>
+    </div>
+    <div class="cols">
+      <div>
+        <h3>Faster, more reliable deploys</h3>
+        <p>
+          Parallel uploads, automatic retries on 429/5xx and SSL hiccups, and
+          SHA1-based optimized uploads mean your site ships quickly — even on
+          flaky connections.
+        </p>
+        <h3>Safer by default</h3>
+        <p>
+          <code>push</code> respects your <code>.gitignore</code> rules, so
+          credentials and build artifacts never reach the server. <code>diff</code>
+          lets you inspect changes before anything touches the remote.
+        </p>
+      </div>
+      <div>
+        <h3>Open and maintained</h3>
+        <p>
+          MIT-licensed, CI-tested on Ruby 3.4, 3.5 and 4.0 across Linux, macOS,
+          Windows and FreeBSD — with an active changelog and a welcoming
+          contributing guide.
+        </p>
+        <h3>Scriptable</h3>
+        <p>
+          Use the <a href="{{ site.baseurl }}/library.html">Ruby client</a> directly,
+          or drive the CLI in CI with <code>--api-key</code> or
+          <code>NEOCITIES_API_KEY</code>.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-band section-alt">
+  <div class="container">
+    <h2>Ready to deploy?</h2>
+    <p>Install the gem, log in once, and push your static site to Neocities.</p>
+    <a class="btn" href="{{ site.baseurl }}/install.html">Install Neocities Red</a>
+    <a class="btn btn-ghost" href="https://github.com/o-200/neocities-red" rel="noopener" target="_blank">Star on GitHub</a>
+  </div>
+</section>

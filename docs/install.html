@@ -1,0 +1,62 @@
+---
+layout: docs
+title: Installation — Neocities Red
+description: >-
+  How to install Neocities Red. Requires Ruby 3.4+. Install with a single
+  gem install command on Linux, macOS or Windows, or build from source.
+---
+
+<h1>Installation</h1>
+
+<p class="lead">Install Neocities Red in one command and start deploying static sites to Neocities.</p>
+
+<h2>Requirements</h2>
+
+<p>Neocities Red requires <strong>Ruby 3.4 or newer</strong> — CI-tested against 3.4, 3.5 and 4.0 on Linux, macOS, Windows and FreeBSD.</p>
+
+<p>Not a programmer? Getting Ruby is easy:</p>
+
+<ul>
+  <li>Install Ruby from <a href="https://www.ruby-lang.org/en/" rel="noopener" target="_blank">ruby-lang.org</a></li>
+  <li>On Windows, install <a href="https://www.msys2.org/" rel="noopener" target="_blank">MSYS2</a> and MINGW for the native build toolchain</li>
+</ul>
+
+<h2>Install the gem</h2>
+
+<div class="code-block">
+  <div class="code-label"><span class="dot"></span>Install</div>
+  <pre><code>gem install neocities-red</code></pre>
+</div>
+
+<p>Check that the CLI is available:</p>
+
+<div class="code-block">
+  <div class="code-label"><span class="dot"></span>Verify</div>
+  <pre><code>neocities-red version
+# => neocities-red version 1.2.0</code></pre>
+</div>
+
+<h2>Build from source</h2>
+
+<p>Clone the repository and use the bundled bin script:</p>
+
+<div class="code-block">
+  <div class="code-label"><span class="dot"></span>From source</div>
+  <pre><code>git clone https://github.com/o-200/neocities-red.git
+cd neocities-red
+bundle install
+bundle exec ruby bin/neocities-red help</code></pre>
+</div>
+
+<h2>Next steps</h2>
+
+<ul>
+  <li><a href="{{ site.baseurl }}/quick-start.html">Quick start</a> — authenticate and push your first site</li>
+  <li><a href="{{ site.baseurl }}/authentication.html">Authentication</a> — API keys, environment variables and config files</li>
+  <li><a href="{{ site.baseurl }}/cli.html">CLI reference</a> — every command and flag</li>
+</ul>
+
+<nav class="page-nav">
+  <span></span>
+  <a href="{{ site.baseurl }}/quick-start.html">Next: Quick Start →</a>
+</nav>

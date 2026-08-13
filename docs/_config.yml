@@ -1,0 +1,46 @@
+title: Neocities Red — A Modern Neocities CLI
+tagline: Deploy your static site to Neocities from the command line
+description: >-
+  Neocities Red is a fast, reliable Neocities CLI and Ruby client. Upload static
+  sites in parallel, sync only what changed, retry flaky API calls automatically
+  and deploy from Jekyll, Hugo, Eleventy and any other static site generator.
+author: o-200
+
+url: "https://o-200.github.io"
+baseurl: "/neocities-red"
+
+repository: o-200/neocities-red
+
+theme: null
+plugins:
+  - jekyll-seo-tag
+  - jekyll-sitemap
+  - jekyll-feed
+
+sass:
+  sourcemap: never
+
+markdown: kramdown
+highlighter: rouge
+kramdown:
+  input: GFM
+  hard_wrap: false
+
+# jekyll-seo-tag settings
+lang: en
+og:
+  locale: en_US
+
+# Sitemap only includes pages that are published and not in sitemap:false
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: "docs"
+      sitemap: true
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - README.md
+  - scripts

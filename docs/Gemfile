@@ -1,0 +1,18 @@
+# frozen_string_literal: true
+
+source "https://rubygems.org"
+
+# Modern Jekyll for local development. The deployed site is built server-side
+# by GitHub Pages (its own Jekyll 3.9 snapshot), so the local stack only needs
+# to render a close approximation on current Ruby.
+gem "jekyll", "~> 4.3"
+gem "jekyll-seo-tag"
+gem "jekyll-sitemap"
+gem "jekyll-feed"
+gem "kramdown-parser-gfm"
+gem "webrick"
+
+# stdlib gems that are no longer bundled with Ruby >= 3.4
+gem "csv"
+gem "base64"
+gem "bigdecimal"

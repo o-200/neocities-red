@@ -37,6 +37,11 @@ coverage/
 doc/
 .yardoc
 
+# Jekyll site (docs/) local build output
+docs/_site/
+docs/.jekyll-cache/
+docs/.sass-cache/
+
 # Temporary files
 tmp/
 *.log
