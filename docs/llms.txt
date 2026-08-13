@@ -1,0 +1,13 @@
+# Neocities Red
+
+> A modern Neocities CLI and Ruby client: deploy static sites to Neocities with parallel uploads, smart diffing and automatic retries.
+
+Neocities Red is a fast, reliable command-line tool and Ruby library for publishing static sites to Neocities. Supports parallel uploads, smart diffing and automatic retries, and works with Jekyll, Hugo, Eleventy and other static site generators. Requires Ruby 3.4+. A community reimplementation of the official Neocities CLI.
+
+## Documentation
+- [Install](https://o-200.github.io/neocities-red/install.html): Install with a single gem install command on Linux, macOS or Windows, or build from source.
+- [Quick Start](https://o-200.github.io/neocities-red/quick-start.html): Deploy a static site to Neocities in three commands: install, authenticate, push.
+- [CLI Reference](https://o-200.github.io/neocities-red/cli.html): All commands and flags — push, upload, delete, diff, list, info, pull, purge, logout.
+- [Authentication](https://o-200.github.io/neocities-red/authentication.html): API keys, environment variables, stored config and interactive login; config locations per platform.
+- [Ruby Library](https://o-200.github.io/neocities-red/library.html): Use Neocities Red programmatically — upload, delete and list files; Client API and namespaced Services classes.
+- [FAQ](https://o-200.github.io/neocities-red/faq.html): Supported Ruby versions, how uploads work, differences from the official CLI.
