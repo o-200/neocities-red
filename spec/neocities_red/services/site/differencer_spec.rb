@@ -23,9 +23,8 @@ RSpec.describe NeocitiesRed::Services::Site::Differencer do
   let(:ignore_dotfiles) { false }
   let(:exclude) { [] }
 
-  # rubocop:disable RSpec/VerifiedDoubles
+  # rubocop:disable-next RSpec/VerifiedDoubles
   let(:pastel) { double("Pastel") }
-  # rubocop:enable RSpec/VerifiedDoubles
 
   let(:file_list_service) do
     instance_double(
