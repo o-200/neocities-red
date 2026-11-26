@@ -31,7 +31,7 @@ Built for performance, reliability, and real-world workflows (especially static 
 
 ## Requirements
 
-- **Ruby 3.4+** (CI-tested against 3.4, 3.5, and 4.0 on Linux, macOS, Windows, and FreeBSD)
+- **Ruby 3.4+** (CI-tested against 3.4 and 4.0 on Linux, macOS, Windows, and FreeBSD)
 
 Not a programmer?
 
